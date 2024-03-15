@@ -84,13 +84,6 @@ Presentation.feedback = relationship("Feedback", back_populates="presentation")
 Base.metadata.create_all(bind=engine)
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 class PresentationFeedback(BaseModel):
     presentation_id: int
@@ -124,8 +117,9 @@ async def submit_user(
     request: Request,
     email: str = Form(""),
     can_email: bool = Form(False),
-    db=Depends(get_db),
 ):
+
+    db = SessionLocal()
 
     user = User(email_address=email, can_email=can_email)
 
@@ -139,13 +133,16 @@ async def submit_user(
 
 
 @app.get("/home")
-async def home_page(request: Request, user_id: str = None):
+async def home_page(request: Request, user_id: str|None = None):
     db = SessionLocal()
     event = db.query(Event).first()
+    email = None
+    if user_id is not None:
+      email = db.query(User).filter(User.id == user_id).one().email_address
 
     return templates.TemplateResponse(
         "home_template.html",
-        context={"request": request, "user_id": user_id, "event": event},
+        context={"request": request, "user_id": user_id, "event": event, "user_email": email},
     )
 
 
@@ -227,7 +224,6 @@ async def submit_feedback(
             comment=comment,
         )
 
-        print("calling add")
         db.add(feedback)
 
 
@@ -237,26 +233,3 @@ async def submit_feedback(
 
     return RedirectResponse(url="/home?user_id={}".format(user_id), status_code=303)
 
-
-# Endpoint to retrieve feedback for a presentation
-@app.get("/feedback/{presentation_id}")
-async def get_feedback_for_presentation(presentation_id: int):
-    db = SessionLocal()
-
-    # Get feedback for the presentation
-    presentation = (
-        db.query(Presentation).filter(Presentation.id == presentation_id).first()
-    )
-    if not presentation:
-        raise HTTPException(status_code=404, detail="Presentation not found")
-
-    presentation_feedback = [
-        {
-            "feedback_id": feedback.id,
-            "rating": feedback.rating,
-            "comment": feedback.comment,
-        }
-        for feedback in presentation.feedback
-    ]
-
-    return presentation_feedback
