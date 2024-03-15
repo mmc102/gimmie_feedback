@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ event_name }}</title>
+</head>
+<body>
+    <h1>{{ event_name }}</h1>
+    <h1>{{ user_id }}</h1>
+    <h1>cat</h1>
+    <div>
+        {% for presentation in presentations %}
+        <h2>{{ presentation.title }}</h2>
+        <p>{{ presentation.description }}</p>
+        <hr>
+        {% endfor %}
+    </div>
+</body>
+</html>

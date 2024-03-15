@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ presentation_title }}</title>
+</head>
+<body>
+    <h1>{{ presentation_title }}</h1>
+    <p>{{ presentation_description }}</p>
+    <form id="feedbackForm" method="POST" action="/presentations/{{ presentation_id }}/feedback">
+    <input type="hidden" name="user_id" value="{{ user_id }}">
+    <input type="hidden" name="feedback_id" value="{{ existing_feedback.id }}">
+    
+    <div>
+        <input type="checkbox" id="wouldUse" name="would_use" value="true" {% if existing_feedback and existing_feedback.would_use %} checked {% endif %}>
+        <label for="wouldUse">I would use this</label>
+    </div>
+    <div>
+        <input type="checkbox" id="dontCare" name="dont_care" value="true" {% if existing_feedback and existing_feedback.dont_care %} checked {% endif %}>
+        <label for="dontCare">I am not interested in this</label>
+    </div>
+    <div>
+        <input type="checkbox" id="wouldInvest" name="would_invest" value="true" {% if existing_feedback and existing_feedback.would_invest %} checked {% endif %}>
+        <label for="wouldInvest">I would invest in this</label>
+    </div>
+    <div>
+        <input type="checkbox" id="wouldWork" name="would_work" value="true" {% if existing_feedback and existing_feedback.would_work %} checked {% endif %}>
+        <label for="wouldWork">I want to work on this with you</label>
+    </div>
+    
+    <br>
+    <label for="comment">Comment:</label>
+    <textarea id="comment" name="comment" rows="3" cols="30">{% if existing_feedback %}{{ existing_feedback.comment }}{% endif %}</textarea>
+    <br>
+    <button type="submit">Submit Feedback</button>
+</form>
+
+
+</body>
+</html>
