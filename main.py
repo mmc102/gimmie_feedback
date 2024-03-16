@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request, Form, Depends
 from sqlalchemy import UniqueConstraint
+from datetime import datetime
 from typing import Optional
 
 import uuid
@@ -132,6 +133,18 @@ async def submit_user(
     return RedirectResponse(url="/home?user_id={}".format(user_id), status_code=303)
 
 
+
+
+@app.get("/")
+async def landing_page(request: Request):
+
+    return templates.TemplateResponse(
+        "landing_template.html",
+        context={"request": request},
+    )
+
+
+
 @app.get("/home")
 async def home_page(request: Request, user_id: str|None = None):
     db = SessionLocal()
@@ -148,6 +161,7 @@ async def home_page(request: Request, user_id: str|None = None):
 
 @app.get("/events/{event_id}")
 async def get_event(request: Request, event_id: int):
+
     db = SessionLocal()
     event = db.query(Event).filter(Event.id == event_id).one_or_none()
     presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
@@ -156,6 +170,44 @@ async def get_event(request: Request, event_id: int):
         "event_template.html",
         {"request": request, "event_name": event.name, "presentations": presentations},
     )
+
+@app.get("/create_event/")
+async def make_event(request: Request):
+    return templates.TemplateResponse(
+        "event_template.html",
+        {"request": request},
+    )
+
+@app.post("/create_event/")
+async def create_event(request: Request, event_name:str = Form("")):
+
+    db = SessionLocal()
+    time = datetime.now()
+    event = Event(name=event_name, date=time)
+    db.add(event)
+    db.commit()
+    event_id = event.id
+    db.close()
+
+
+    return templates.TemplateResponse(
+        "generate_presentations_template.html",
+        {"request": request, "event_id":event_id},
+    )
+
+
+
+@app.post("/create_presentations")
+async def create_presentations(request: Request, event_id:int = Form(...), ):
+    # TODO build this out
+
+    db = SessionLocal()
+    return None 
+
+
+
+
+
 
 
 @app.get("/presentations/{presentation_id}/{user_id}")

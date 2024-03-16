@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Add Presentations</title>
+        <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+        </style>
+    </head>
+    <body>
+        <h1>Add Presentations to Event</h1>
+        <form action="/create_presentations/" id="presentationForm" method="POST">
+            <input type="hidden" name="event_id" value="{{ event_id }}">
+            <table id="presentationTable">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Tagline</th>
+                    <th>URL</th>
+                </tr>
+                <tr class="presentation">
+                    <td><input type="text" name="name" required></td>
+                    <td><input type="email" name="email" required></td>
+                <td><input type="text" name="tagline" required></td>
+                <td><input type="text" name="url" required></td>
+            </tr>
+        </table>
+        <button type="button" onclick="addPresentation()">Add Presentation</button>
+        <button type="submit">Submit Presentations</button>
+    </form>
+
+    <script>
+        function addPresentation() {
+            const presentationTable = document.querySelector("#presentationTable");
+            const newPresentationRow = document.querySelector(".presentation").cloneNode(true);
+            presentationTable.appendChild(newPresentationRow);
+        }
+    </script>
+</body>
+</html>
