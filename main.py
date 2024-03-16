@@ -43,8 +43,10 @@ class Presentation(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     event_id = Column(Integer, ForeignKey("events.id"))
-    title = Column(String)
-    description = Column(String)
+    name = Column(String)
+    tagline = Column(String)
+    email = Column(String)
+    url = Column(String)
 
     event = relationship("Event", back_populates="presentations")
 
@@ -166,10 +168,13 @@ async def get_event(request: Request, event_id: int):
     event = db.query(Event).filter(Event.id == event_id).one_or_none()
     presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
 
+    presentations = None if len([r for r in presentations]) == 0 else presentations
+
     return templates.TemplateResponse(
-        "event_template.html",
-        {"request": request, "event_name": event.name, "presentations": presentations},
+        "generate_presentations_template.html",
+        {"request": request, "event":event, "presentations":presentations},
     )
+
 
 @app.get("/create_event/")
 async def make_event(request: Request):
@@ -184,28 +189,90 @@ async def create_event(request: Request, event_name:str = Form("")):
     db = SessionLocal()
     time = datetime.now()
     event = Event(name=event_name, date=time)
+
     db.add(event)
     db.commit()
     event_id = event.id
+
+    existing_presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
     db.close()
 
 
     return templates.TemplateResponse(
         "generate_presentations_template.html",
-        {"request": request, "event_id":event_id},
+        {"request": request, "event":event, "presentations": existing_presentations},
     )
 
 
 
+
 @app.post("/create_presentations")
-async def create_presentations(request: Request, event_id:int = Form(...), ):
-    # TODO build this out
+async def create_presentations(request: Request, 
+                               event_id: int = Form(...), 
+                               presentation_ids: list = Form(...),
+                               names: list = Form(...), 
+                               emails: list = Form(...), 
+                               taglines: list = Form(...), 
+                               urls: list = Form(...), 
+                               ):
 
     db = SessionLocal()
-    return None 
+
+    # Ensure that the lists of data have the same length
+    if len(names) != len(emails) != len(taglines) != len(urls):
+        return {"error": "Invalid data"}
+
+    # remove presentations that are no longer in the table
+    existing_presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
+
+    to_delete = [row for row in existing_presentations if str(row.id) not in presentation_ids]
+
+    for row in to_delete:
+        db.delete(row)
 
 
 
+
+    # Create presentations
+    presentations = []
+    for presentation_id ,name, email, tagline, url in zip(presentation_ids, names, emails, taglines, urls):
+        presentation_id = None if presentation_id == "" else presentation_id
+        print(presentation_id)
+        if presentation_id is not None:
+            presentation = db.query(Presentation).filter(Presentation.id == presentation_id)
+            presentation.name = name
+            presentation.email = email
+            presentation.tagline = tagline
+            presentation.url = url
+
+        else:
+          presentation = Presentation(name=name, email=email, tagline=tagline, url=url, event_id=event_id)
+          presentations.append(presentation)
+
+    # Add presentations to the database
+    db.add_all(presentations)
+    db.commit()
+    db.close()
+
+
+    return RedirectResponse(url="/events/{}".format(event_id), status_code=303)
+
+
+
+# @app.get("/events_overview/{event_id}")
+# async def event_overview(request: Request, event_id:int):
+
+#     db = SessionLocal()
+#     event = db.query(Event).filter(Event.id == event_id).one()
+
+#     presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
+
+
+#     # Render the event overview template with the scheduled events
+#     return templates.TemplateResponse(
+#         "event_overview_template.html",
+#         {"request": request, "scheduled_event": event, "presentations":presentations},
+#     )
 
 
 

@@ -1,2 +1,1 @@
-add url to the project
-add the maker url
+there is still an edge case where all of the events are empty and we try to save
