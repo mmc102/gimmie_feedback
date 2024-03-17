@@ -1,6 +1,6 @@
 docker run --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=postgres -p 6969:5432 -d postgres:latest
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres
-docker build -t fastapi-app .
+docker build --build-arg DATABASE_URL=$DATABASE_URL -t fastapi-app .
 docker run -p 8000:8000 fastapi-app
 
 # install docker on ubuntu ec2 instance

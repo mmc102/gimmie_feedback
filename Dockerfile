@@ -5,6 +5,12 @@ FROM python:3.12-bullseye
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# Define a build-time argument
+ARG DATABASE_URL
+
+# Set the environment variable using the build-time argument
+ENV DATABASE_URL=$DATABASE_URL
+
 # Set the working directory in the container
 WORKDIR /app
 
