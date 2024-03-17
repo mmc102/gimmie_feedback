@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request, Form, Depends
+import os
 from sqlalchemy import UniqueConstraint
 from datetime import datetime
 from typing import Optional
@@ -19,10 +20,11 @@ templates = Jinja2Templates(directory="templates")
 # Initialize FastAPI app
 app = FastAPI()
 
-# Create SQLAlchemy engine and session
-SQLALCHEMY_DATABASE_URL = (
-    "postgresql://postgres:mysecretpassword@172.17.0.2:5432/postgres"
-)
+# Define a default value for the database URL
+DEFAULT_DATABASE_URL = "postgresql://postgres:mysecretpassword@localhost:5432/postgres"
+
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

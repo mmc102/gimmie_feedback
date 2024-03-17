@@ -20,3 +20,8 @@ sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io
 sudo docker --version
 sudo usermod -aG docker $USER
+
+
+# set an env varaible for the db url
+echo 'export DATABASE_URL="postgresql://postgres:{put the password here}@database-1.cxmow2wac1p0.us-west-2.rds.amazonaws.com/postgres"' >> ~/.bashrc
+
