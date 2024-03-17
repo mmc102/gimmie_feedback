@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 from fastapi.templating import Jinja2Templates
 
+
 templates = Jinja2Templates(directory="templates")
 
 
@@ -20,7 +21,7 @@ app = FastAPI()
 
 # Create SQLAlchemy engine and session
 SQLALCHEMY_DATABASE_URL = (
-    "postgresql://postgres:mysecretpassword@localhost:6969/postgres"
+    "postgresql://postgres:mysecretpassword@172.17.0.2:5432/postgres"
 )
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -56,7 +57,7 @@ class Feedback(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     presentation_id = Column(Integer, ForeignKey("presentations.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.id"))
     would_use = Column(Boolean)
     dont_care = Column(Boolean)
     would_invest = Column(Boolean)
@@ -117,9 +118,9 @@ async def get_user(request: Request):
 
 @app.post("/user/")
 async def submit_user(
-    request: Request,
-    email: str = Form(""),
-    can_email: bool = Form(False),
+        request: Request,
+        email: str = Form(""),
+        can_email: bool = Form(False),
 ):
 
     db = SessionLocal()
@@ -153,7 +154,7 @@ async def home_page(request: Request, user_id: str|None = None):
     event = db.query(Event).first()
     email = None
     if user_id is not None:
-      email = db.query(User).filter(User.id == user_id).one().email_address
+        email = db.query(User).filter(User.id == user_id).one().email_address
 
     return templates.TemplateResponse(
         "home_template.html",
@@ -246,8 +247,8 @@ async def create_presentations(request: Request,
             presentation.url = url
 
         else:
-          presentation = Presentation(name=name, email=email, tagline=tagline, url=url, event_id=event_id)
-          presentations.append(presentation)
+            presentation = Presentation(name=name, email=email, tagline=tagline, url=url, event_id=event_id)
+            presentations.append(presentation)
 
     # Add presentations to the database
     db.add_all(presentations)
@@ -309,15 +310,15 @@ async def get_presentation(request: Request, presentation_id: int, user_id: str)
 
 @app.post("/presentations/{presentation_id}/feedback")
 async def submit_feedback(
-    request: Request,
-    presentation_id: int,
-    would_use: bool = Form(False),
-    dont_care: bool = Form(False),
-    would_invest: bool = Form(False),
-    would_work: bool = Form(False),
-    comment: str = Form(""),
-    user_id: str = Form(""),
-    feedback_id: Optional[int] = Form(None), 
+        request: Request,
+        presentation_id: int,
+        would_use: bool = Form(False),
+        dont_care: bool = Form(False),
+        would_invest: bool = Form(False),
+        would_work: bool = Form(False),
+        comment: str = Form(""),
+        user_id: str = Form(""),
+        feedback_id: Optional[int] = Form(None), 
 ):
     db = SessionLocal()
 
