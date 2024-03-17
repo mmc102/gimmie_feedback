@@ -21,9 +21,9 @@ templates = Jinja2Templates(directory="templates")
 app = FastAPI()
 
 # Define a default value for the database URL
-DEFAULT_DATABASE_URL = "postgresql://postgres:mysecretpassword@localhost:5432/postgres"
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+print(f"database url {SQLALCHEMY_DATABASE_URL}")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
