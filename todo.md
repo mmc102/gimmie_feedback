@@ -5,3 +5,5 @@ there is a bug where deleting the final presentation causes a page crash
 1. make an event
 2. delete all the presentations
 3. page crashes
+
+come up with a unified login stategy 
