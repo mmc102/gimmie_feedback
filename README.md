@@ -139,6 +139,4 @@ a valid way to test the app is running in the container:
 curl http://localhost:8000
 
 
-ok nginx still borked somehow
-
 
