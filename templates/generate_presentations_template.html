@@ -1,25 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Presentations</title>
-    <!-- Include Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
-    <div class="container mx-auto py-8">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Add Presentations</title>
+        <!-- Include Tailwind CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    </head>
 
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">{{event.name}}</h1>
+    <body class="bg-gray-100 font-sans leading-normal tracking-normal">
+        <div class="container mx-auto py-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ event.name }}</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Add Presenters</h1>
 
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">Add Presenters</h1>
-
-        <form id="presentationForm" method="POST" action="/create_presentations">
-            <input type="hidden" name="event_id" value="{{ event.id }}">
+            {% if presentations %}
             <table class="w-full border-collapse border border-gray-200">
                 <thead>
                     <tr class="bg-gray-100">
-                        <th></th>
                         <th class="px-4 py-2">Product Name</th>
                         <th class="px-4 py-2">Tagline</th>
                         <th class="px-4 py-2">Outreach Email</th>
@@ -27,63 +24,28 @@
                         <th class="px-4 py-2">Actions</th>
                     </tr>
                 </thead>
-
                 <tbody id="presentationTable">
-                    {% if presentations %}
                     {% for presentation in presentations %}
                     <tr class="presentation">
-
-
-<td class="px-4 py-2"><input type="hidden" name="presentation_ids" class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.id }}"></td>
-                        <td class="px-4 py-2"><input type="text" name="names" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.name }}"></td>
-                        <td class="px-4 py-2"><input type="text" name="taglines" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.tagline }}"></td>
-                        <td class="px-4 py-2"><input type="email" name="emails" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.email }}"></td>
-                        <td class="px-4 py-2"><input type="text" name="urls" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.url }}"></td>
-                        <td class="px-4 py-2"><button type="button" onclick="removePresentation(this)" class="bg-red-500 text-white px-4 py-2 rounded">Remove</button></td>
+                        <td class="px-4 py-2">{{ presentation.name }}</td>
+                        <td class="px-4 py-2">{{ presentation.tagline }}</td>
+                        <td class="px-4 py-2">{{ presentation.email }}</td>
+                        <td class="px-4 py-2">{{ presentation.url }}</td>
+                        <td class="px-4 py-2"><button type="button" onclick="removePresentation(this)" class="bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded">Review Product</button></td>
                     </tr>
                     {% endfor %}
 
-                  {% else %}
-                    <tr class="presentation">
-
-
-<td class="px-4 py-2"><input type="hidden" name="presentation_ids" class="border border-gray-300 px-4 py-2 w-full" value="{{ null }}"></td>
-                        <td class="px-4 py-2"><input type="text" name="names" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                        <td class="px-4 py-2"><input type="text" name="taglines" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                        <td class="px-4 py-2"><input type="email" name="emails" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                        <td class="px-4 py-2"><input type="text" name="urls" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                        <td class="px-4 py-2"><button type="button" onclick="removePresentation(this)" class="bg-red-500 text-white px-4 py-2 rounded">Remove</button></td>
-                    </tr>
-
-          {% endif %} 
-
-
                 </tbody>
             </table>
+            {% else %}
+            <h1>No Presentations Scheduled!</h1>
 
-            <button type="button" onclick="addPresentation()" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Add Presentation</button>
-            <button type="submit" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Submit Presentations</button>
+            {% endif %}
+            <form action="/event_unlock/{{ event.id }}" method="get">
+                <button type="submit" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Edit Event</button>
+            </form>
 
-        </form>
-    </div>
 
-    <script>
-        function addPresentation() {
-            const presentationTable = document.querySelector("#presentationTable");
-            const newPresentationRow = document.querySelector(".presentation").cloneNode(true);
+        </div>
+    </body>
 
-            const inputs = newPresentationRow.querySelectorAll("input");
-            inputs.forEach(input => {
-                input.value = "";  
-            });
-
-            presentationTable.appendChild(newPresentationRow);
-        }
-
-        function removePresentation(button) {
-            const row = button.closest("tr");
-            row.remove();
-        }
-    </script>
-</body>
-</html>

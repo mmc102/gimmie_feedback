@@ -1,5 +1,16 @@
-docker run --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=postgres -p 6969:5432 -d postgres:latest
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres
+# running the app local
+** create a db:
+docker run -d -p 6969:5432 --name postgres-db -e POSTGRES_PASSWORD=mysecretpassword postgres:latest
+
+
+export DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:6969/postgres"
+
+
+** run the web app
+uvicorn main:app  --port 8000 --reload
+
+
+
 docker build --build-arg DATABASE_URL=$DATABASE_URL -t fastapi-app .
 docker run -p 8000:8000 -p 443:443 fastapi-app
 
@@ -140,3 +151,4 @@ curl http://localhost:8000
 
 
 
+`
