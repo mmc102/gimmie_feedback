@@ -43,7 +43,6 @@ class Event(Base):
     password = Column(String)
 
 
-
 class Presentation(Base):
     __tablename__ = "presentations"
 
@@ -71,9 +70,8 @@ class Feedback(Base):
 
     presentation = relationship("Presentation", back_populates="feedback")
 
-
     __table_args__ = (
-        UniqueConstraint('presentation_id', 'user_id', name='uq_presentation_user'),
+        UniqueConstraint("presentation_id", "user_id", name="uq_presentation_user"),
     )
 
 
@@ -91,7 +89,6 @@ Presentation.feedback = relationship("Feedback", back_populates="presentation")
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
-
 
 
 class PresentationFeedback(BaseModel):
@@ -139,6 +136,7 @@ async def submit_user(
 
     return RedirectResponse(url="/home?user_id={}".format(user_id), status_code=303)
 
+
 @app.get("/edit_event/")
 async def edit_event(
         request: Request,
@@ -151,7 +149,7 @@ async def edit_event(
         return templates.TemplateResponse(
             "error.html",
             {"request": request, "message": "Invalid Token"},
-            status_code=401
+            status_code=401,
         )
 
     presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
@@ -159,8 +157,9 @@ async def edit_event(
 
     return templates.TemplateResponse(
         "update_presentations_template.html",
-        {"request": request, "event":event, "presentations":presentations, "m": m},
+        {"request": request, "event": event, "presentations": presentations, "m": m},
     )
+
 
 @app.get("/event_unlock/")
 async def event_unlock(
@@ -176,14 +175,16 @@ async def event_unlock(
 
     hashed_password = hash_password(password)
     if hashed_password == event.password:
-        return RedirectResponse(url=f"/edit_event/?event_id={event_id}&m={hashed_password}")
+        return RedirectResponse(
+            url=f"/edit_event/?event_id={event_id}&m={hashed_password}"
+        )
 
     else:
         # Return an error response for wrong password
         return templates.TemplateResponse(
             "error.html",
             {"request": request, "message": "Incorrect password. Please try again."},
-            status_code=401  # Unauthorized status code
+            status_code=401,  # Unauthorized status code
         )
 
 
@@ -192,34 +193,34 @@ async def event_unlock_get(
         request: Request,
         event_id: int,
 ):
-    db =SessionLocal()
+    db = SessionLocal()
 
-    event =  db.query(Event).filter(Event.id ==event_id).one()
+    event = db.query(Event).filter(Event.id == event_id).one()
     return templates.TemplateResponse(
         "password.html",
-        {"request": request, "event": event },
+        {"request": request, "event": event},
     )
-
 
 
 @app.get("/")
 async def landing_page(request: Request):
     db = SessionLocal()
-    events= [row for row in db.query(Event)]
+    events = [row for row in db.query(Event)]
     for event in db.query(Event):
         clean_date = event.date[:10]
-        event.date= clean_date
+        event.date = clean_date
 
     return templates.TemplateResponse(
         "landing_template.html",
-        context={"request": request,
-                 "events": events,},
+        context={
+            "request": request,
+            "events": events,
+        },
     )
 
 
-
 @app.get("/home")
-async def home_page(request: Request, user_id: str|None = None):
+async def home_page(request: Request, user_id: str | None = None):
     db = SessionLocal()
     event = db.query(Event).first()
     email = None
@@ -228,7 +229,12 @@ async def home_page(request: Request, user_id: str|None = None):
 
     return templates.TemplateResponse(
         "home_template.html",
-        context={"request": request, "user_id": user_id, "event": event, "user_email": email},
+        context={
+            "request": request,
+            "user_id": user_id,
+            "event": event,
+            "user_email": email,
+        },
     )
 
 
@@ -241,11 +247,9 @@ async def get_event(request: Request, event_id: int):
 
     presentations = None if len([r for r in presentations]) == 0 else presentations
 
-
-
     return templates.TemplateResponse(
         "generate_presentations_template.html",
-        {"request": request, "event":event, "presentations":presentations},
+        {"request": request, "event": event, "presentations": presentations},
     )
 
 
@@ -256,8 +260,11 @@ async def make_event(request: Request):
         {"request": request},
     )
 
+
 @app.post("/create_event/")
-async def create_event(request: Request, event_name:str = Form(""), password: str = Form("")):
+async def create_event(
+        request: Request, event_name: str = Form(""), password: str = Form("")
+):
 
     db = SessionLocal()
     time = datetime.now()
@@ -268,31 +275,37 @@ async def create_event(request: Request, event_name:str = Form(""), password: st
     db.commit()
     event_id = event.id
 
-    existing_presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
+    existing_presentations = db.query(Presentation).filter(
+        Presentation.event_id == event_id
+    )
     presentations = [row for row in existing_presentations] or None
 
     db.close()
 
-
     return templates.TemplateResponse(
         "update_presentations_template.html",
-        {"request": request, "event":event, "presentations": presentations, "m": hashed},
+        {
+            "request": request,
+            "event": event,
+            "presentations": presentations,
+            "m": hashed,
+        },
     )
 
 
 @app.post("/create_presentations")
-async def create_presentations(request: Request, 
-                               event_id: int = Form(...), 
-                               presentation_ids: list = Form(...),
-                               names: list = Form(...), 
-                               emails: list = Form(...), 
-                               taglines: list = Form(...), 
-                               urls: list = Form(...), 
-                               m: str = Form(...), 
-                               ):
+async def create_presentations(
+        request: Request,
+        event_id: int = Form(...),
+        presentation_ids: List[int] = Form([]),
+        names: List[str] = Form([]),
+        emails: List[str] = Form([]),
+        taglines: List[str] = Form([]),
+        urls: List[str] = Form([]),
+        m: str = Form(...),
+):
 
     db = SessionLocal()
-
 
     event = db.query(Event).filter(Event.id == event_id).one()
     assert m == event.password
@@ -302,9 +315,13 @@ async def create_presentations(request: Request,
         return {"error": "Invalid data"}
 
     # remove presentations that are no longer in the table
-    existing_presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
+    existing_presentations = db.query(Presentation).filter(
+        Presentation.event_id == event_id
+    )
 
-    to_delete = [row for row in existing_presentations if str(row.id) not in presentation_ids]
+    to_delete = [
+        row for row in existing_presentations if str(row.id) not in presentation_ids
+    ]
 
     for row in to_delete:
         db.delete(row)
@@ -312,10 +329,14 @@ async def create_presentations(request: Request,
     # Create presentations
     new_presentations = []
     not_new_presentations = []
-    for presentation_id ,name, email, tagline, url in zip(presentation_ids, names, emails, taglines, urls):
+    for presentation_id, name, email, tagline, url in zip(
+            presentation_ids, names, emails, taglines, urls
+    ):
         presentation_id = None if presentation_id == "" else presentation_id
         if presentation_id is not None:
-            presentation = db.query(Presentation).filter(Presentation.id == presentation_id)
+            presentation = db.query(Presentation).filter(
+                Presentation.id == presentation_id
+            )
             presentation.name = name
             presentation.email = email
             presentation.tagline = tagline
@@ -324,21 +345,26 @@ async def create_presentations(request: Request,
             not_new_presentations.append(presentation)
 
         else:
-            presentation = Presentation(name=name, email=email, tagline=tagline, url=url, event_id=event_id)
+            presentation = Presentation(
+                name=name, email=email, tagline=tagline, url=url, event_id=event_id
+            )
             new_presentations.append(presentation)
 
     # Add presentations to the database
     db.add_all(new_presentations)
 
-
     db.commit()
-
 
     return templates.TemplateResponse(
         "update_presentations_template.html",
-        {"request": request, "m": m, "event":event, "presentations": new_presentations+ not_new_presentations, "message": "Successfully Saved"},
+        {
+            "request": request,
+            "m": m,
+            "event": event,
+            "presentations": new_presentations + not_new_presentations,
+            "message": "Successfully Saved",
+        },
     )
-
 
 
 @app.get("/presentations/{presentation_id}/{user_id}")
@@ -352,11 +378,11 @@ async def get_presentation(request: Request, presentation_id: int, user_id: str)
     existing_feedback = (
         db.query(Feedback)
         .filter(Feedback.presentation_id == presentation_id)
-        .filter(Feedback.user_id == user_id).first()
+        .filter(Feedback.user_id == user_id)
+        .first()
     )
     if not presentation:
         print("idk bad thing")
-
 
     return templates.TemplateResponse(
         "presentation_template.html",
@@ -381,7 +407,7 @@ async def submit_feedback(
         would_work: bool = Form(False),
         comment: str = Form(""),
         user_id: str = Form(""),
-        feedback_id: Optional[int] = Form(None), 
+        feedback_id: Optional[int] = Form(None),
 ):
     db = SessionLocal()
 
@@ -408,13 +434,11 @@ async def submit_feedback(
 
         db.add(feedback)
 
-
-
     db.commit()
     db.close()
 
     return RedirectResponse(url="/home?user_id={}".format(user_id), status_code=303)
 
 
-def hash_password(password:str):
+def hash_password(password: str):
     return hashlib.sha256(password.strip().encode()).hexdigest()
