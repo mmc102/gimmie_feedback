@@ -1,41 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Landing Page</title>
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-gray-100 font-sans leading-normal tracking-normal">
+{% extends "base.html" %}
 
-        <div class="container mx-auto max-w-md p-8">
-            <h1 class="text-3xl font-bold text-gray-800 mt-8 mb-4">Gimmie Feedback (IRL)</h1>
-            {% if user_id %}
-            <p class="text-lg text-gray-700">Hi, {{user_email}} 👋</p>
-            {% else %}
-            <p class="text-lg text-gray-700">No user found. Please create a user.</p>
-            <form action="/user/" method="GET">
-                <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create User</button>
-            </form>
-            {% endif %}
+{% block title %}Home Page{% endblock %}
 
-        </div>
-        <div class="container mx-auto max-w-md p-8">
-            <a href="/create_event" class="block w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 text-center">Create Event</a>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
-            {% if events %}
-            <ul>
-                {% for event in events %}
-                <li class="mb-2">
+{% block content %}
 
-                    <a href="/events/{{ event.id }}" class="text-blue-500 hover:text-blue-700">{{ event.name }} - {{ event.date }} </a>
 
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-lg text-gray-700">No upcoming events found.</p>
-            {% endif %}
-        </div>
-    </body>
-</html>
+<div class="container mx-auto max-w-md p-8">
+    <h1 class="text-3xl font-bold text-gray-800 mt-8 mb-4">Really Great Feedback</h1>
+    <h3 class="text-3xl font-bold text-gray-800 mt-8 mb-4">Empowering makers to get feedback on their demos</h3>
+    {% if user_id %}
+    <p class="text-lg text-gray-700">Hi, {{user_email}} 👋</p>
+    {% else %}
+    <p class="text-lg text-gray-700">No user found. Please create a user.</p>
+    <form action="/user/" method="GET">
+        <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create User</button>
+    </form>
+    {% endif %}
+
+</div>
+<div class="container mx-auto max-w-md p-8">
+    <a href="/create_event" class="block w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 text-center">Create Event</a>
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
+    {% if events %}
+    <ul>
+        {% for event in events %}
+        <li class="mb-2">
+
+            <a href="/events/{{ event.id }}" class="text-blue-500 hover:text-blue-700">{{ event.name }} - {{ event.date }} </a>
+
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-lg text-gray-700">No upcoming events found.</p>
+    {% endif %}
+</div>
+{% endblock %}

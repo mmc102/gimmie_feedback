@@ -261,6 +261,16 @@ async def make_event(request: Request):
     )
 
 
+@app.get("/about/")
+async def make_about(request: Request):
+    return templates.TemplateResponse(
+        "about.html",
+        {"request": request},
+    )
+
+
+
+
 @app.post("/create_event/")
 async def create_event(
         request: Request, event_name: str = Form(""), password: str = Form("")

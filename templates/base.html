@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Your Title{% endblock %}</title>
+        <!-- Include common CSS files -->
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body class="bg-gray-100 font-sans leading-normal tracking-normal">
+        <nav class="bg-blue-500 p-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between">
+                    <div class="flex items-center">
+                        <a href="/" class="text-white font-bold text-xl">Really Great Feedback</a>
+                    </div>
+                    <div class="flex items-center">
+                        <ul class="flex space-x-4">
+                            <li><a href="/" class="text-white hover:text-gray-200">Home</a></li>
+                            <!-- Add more navigation links as needed -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <!-- Content block -->
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+
+</html>
