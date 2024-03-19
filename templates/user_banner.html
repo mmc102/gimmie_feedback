@@ -1,0 +1,26 @@
+
+{% block banner %}
+<div id="dismissable-banner" class="bg-blue-100 border-t-4 flex flex-row justify-space-between border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
+    <p class="text-lg text-gray-700">
+        {% if user_id %}
+        Hi, {{ user_email }} 👋
+        {% else %}
+        Create a (very minimal) user to leave feedback!
+
+    </p>
+    <form action="/user/{{ event.id }}" method="GET">
+        <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create User</button>
+    </form>
+
+    {% endif %}
+</div>
+<script>
+ function dismissBanner() {
+     var banner = document.getElementById("dismissable-banner");
+     if (banner) {
+         banner.style.display = "none";
+     }
+ }
+</script>
+
+{% endblock %}

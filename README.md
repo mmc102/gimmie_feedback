@@ -12,7 +12,7 @@ uvicorn main:app  --port 8000 --reload
 
 
 docker build --build-arg DATABASE_URL=$DATABASE_URL -t fastapi-app .
-docker run -p 8000:8000 -p 443:443 fastapi-app
+docker run -p j000:8000 -p 443:443 fastapi-app
 
 # install docker on ubuntu ec2 instance
 sudo apt update
@@ -34,7 +34,7 @@ sudo usermod -aG docker $USER
 
 
 # set an env varaible for the db url
-echo 'export DATABASE_URL="postgresql://postgres:{put the password here}@database-1.cxmow2wac1p0.us-west-2.rds.amazonaws.com/postgres"' >> ~/.bashrc
+echo 'export DATABASE_URL="postgresql://postgres:{put the password here}@database-1.{blahlblahblah}.us-west-2.rds.amazonaws.com/postgres"' >> ~/.bashrc
 
 
 # then run the build and run commands from above
@@ -49,7 +49,7 @@ sudo nano /etc/nginx/sites-available/fastapi.conf
 
 server {
 listen 80;
-server_name 54.185.59.109;  # Replace with public IP address of server
+server_name {blah};  # Replace with public IP address of server
 
     location / {
         proxy_pass http://0.0.0.0:8000;  
@@ -74,7 +74,7 @@ buy a domain
 
 set the following records:
 
-@    A   N/A   54.185.59.109
+@    A   N/A   {ip of server public}
 
 www CNAME N/A  reallygreatfeedback.com
 

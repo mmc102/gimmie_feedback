@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException, Request, Form
+from fastapi import FastAPI, HTTPException, Request, Form, Depends
+from starlette.middleware.sessions import SessionMiddleware
+from fastapi.security import APIKeyCookie
 import hashlib
 import os
 from sqlalchemy import UniqueConstraint
@@ -20,18 +22,20 @@ templates = Jinja2Templates(directory="templates")
 
 # Initialize FastAPI app
 app = FastAPI()
-
+app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 # Define a default value for the database URL
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
-print(f"database url {SQLALCHEMY_DATABASE_URL}")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
+api_key_cookie = APIKeyCookie(name="session_token")
+
+
 # Define SQLAlchemy base model
 Base = declarative_base()
-
 
 # Define SQLAlchemy models
 class Event(Base):
@@ -87,9 +91,18 @@ class User(Base):
 Event.presentations = relationship("Presentation", back_populates="event")
 Presentation.feedback = relationship("Feedback", back_populates="presentation")
 
+
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
 
+
+def get_session(request: Request):
+    val=  request.session
+    return val
+
+def get_current_user(session: dict = Depends(get_session)) -> Optional[dict]:
+    val = session.get("user")
+    return val
 
 class PresentationFeedback(BaseModel):
     presentation_id: int
@@ -107,34 +120,47 @@ class EventModel(BaseModel):
         orm_mode = True
 
 
-@app.get("/user/")
-async def get_user(request: Request):
+@app.get("/user/{event_id}")
+async def get_user(request: Request, event_id: int):
     return templates.TemplateResponse(
         "user_template.html",
         {
             "request": request,
+            "event_id": event_id
         },
     )
 
 
-@app.post("/user/")
+@app.post("/user/{event_id}")
 async def submit_user(
         request: Request,
+        event_id: int ,
         email: str = Form(""),
         can_email: bool = Form(False),
+        session = Depends(get_session)
 ):
 
     db = SessionLocal()
 
     user = User(email_address=email, can_email=can_email)
 
+    event = db.query(Event).filter(Event.id == event_id).one()
+    presentations = [row for row in db.query(Presentation).filter(Presentation.event_id == event_id)]
+
     db.add(user)
     db.commit()
 
     user_id = user.id
-    db.close()
+    user_email = user.email_address
+    session["user"] = {"user_id": user.id, "email": user.email_address}
 
-    return RedirectResponse(url="/home?user_id={}".format(user_id), status_code=303)
+
+    return templates.TemplateResponse(
+        "generate_presentations_template.html",
+        {"request": request, "event": event, "presentations": presentations, "user_id":user_id, "user_email": user_email},
+
+    )
+
 
 
 @app.get("/edit_event/")
@@ -239,7 +265,8 @@ async def home_page(request: Request, user_id: str | None = None):
 
 
 @app.get("/events/{event_id}")
-async def get_event(request: Request, event_id: int):
+async def get_event(request: Request, event_id: int,
+                    user = Depends(get_current_user)):
 
     db = SessionLocal()
     event = db.query(Event).filter(Event.id == event_id).one_or_none()

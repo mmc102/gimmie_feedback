@@ -7,7 +7,6 @@
         <!-- Include common CSS files -->
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
-        <link rel="stylesheet" href="style.css">
     </head>
 
     <body class="bg-gray-100 font-sans leading-normal tracking-normal">
@@ -19,6 +18,9 @@
                     </div>
                     <div class="flex items-center">
                         <ul class="flex space-x-4">
+                            <li>
+                                <a href="/" class="text-white font-bold text-xl">{{ request.session.user.email }}</a>
+                            </li>
                             <li><a href="/" class="text-white hover:text-gray-200">Home</a></li>
                             <!-- Add more navigation links as needed -->
                         </ul>

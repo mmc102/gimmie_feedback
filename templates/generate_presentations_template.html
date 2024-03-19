@@ -1,51 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Add Presentations</title>
-        <!-- Include Tailwind CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    </head>
+{% extends "base.html" %}
 
-    <body class="bg-gray-100 font-sans leading-normal tracking-normal">
-        <div class="container mx-auto py-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ event.name }}</h1>
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">Add Presenters</h1>
+{% block title %}Home Page{% endblock %}
 
-            {% if presentations %}
-            <table class="w-full border-collapse border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2">Product Name</th>
-                        <th class="px-4 py-2">Tagline</th>
-                        <th class="px-4 py-2">Outreach Email</th>
-                        <th class="px-4 py-2">URL</th>
-                        <th class="px-4 py-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="presentationTable">
-                    {% for presentation in presentations %}
-                    <tr class="presentation">
-                        <td class="px-4 py-2">{{ presentation.name }}</td>
-                        <td class="px-4 py-2">{{ presentation.tagline }}</td>
-                        <td class="px-4 py-2">{{ presentation.email }}</td>
-                        <td class="px-4 py-2">{{ presentation.url }}</td>
-                        <td class="px-4 py-2"><button type="button" onclick="removePresentation(this)" class="bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded">Review Product</button></td>
-                    </tr>
-                    {% endfor %}
+{% block content %}
 
-                </tbody>
-            </table>
-            {% else %}
-            <h1>No Presentations Scheduled!</h1>
+{% include 'user_banner.html' %}
 
-            {% endif %}
-            <form action="/event_unlock/{{ event.id }}" method="get">
-                <button type="submit" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Edit Event</button>
-            </form>
+<div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ event.name }}</h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Demos</h1>
 
-
+    {% if presentations %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for presentation in presentations %}
+        <div class="bg-white shadow-md rounded-md p-4">
+            <h2 class="text-2xl font-bold text-gray-800">{{ presentation.name }}</h2>
+            <p class="text-xl text-gray-600">{{ presentation.tagline }}</p>
+            <p class="text-gray-600">{{ presentation.url }}</p>
+            <p class="text-gray-600">{{ presentation.email }}</p>
+            <button type="button" onclick="removePresentation(this)" class="mt-2 bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded">Review Product</button>
         </div>
-    </body>
+        {% endfor %}
+    </div>
+    {% else %}
+    <h1>No Presentations Scheduled!</h1>
+    {% endif %}
+
+
+
+
+
+    <form action="/event_unlock/{{ event.id }}" method="get">
+        <button type="submit" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Edit Event</button>
+    </form>
+
+
+</div>
+
+{% endblock %}
 
