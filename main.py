@@ -340,18 +340,17 @@ async def create_event(
 async def create_presentations(
         request: Request,
         event_id: int = Form(...),
-        presentation_ids: List[int] = Form([]),
+        presentation_ids: List[int | None] = Form([]),
         names: List[str] = Form([]),
         emails: List[str] = Form([]),
         taglines: List[str] = Form([]),
         urls: List[str] = Form([]),
-        m: str = Form(...),
 ):
+    # TODO this needs to be password protected
 
     db = SessionLocal()
 
     event = db.query(Event).filter(Event.id == event_id).one()
-    assert m == event.password
 
     # Ensure that the lists of data have the same length
     if len(names) != len(emails) != len(taglines) != len(urls):
@@ -375,7 +374,7 @@ async def create_presentations(
     for presentation_id, name, email, tagline, url in zip(
             presentation_ids, names, emails, taglines, urls
     ):
-        presentation_id = None if presentation_id == "" else presentation_id
+        presentation_id = None if presentation_id == -1 else presentation_id
         if presentation_id is not None:
             presentation = db.query(Presentation).filter(
                 Presentation.id == presentation_id
@@ -402,7 +401,6 @@ async def create_presentations(
         "update_presentations_template.html",
         {
             "request": request,
-            "m": m,
             "event": event,
             "presentations": new_presentations + not_new_presentations,
             "message": "Successfully Saved",
@@ -464,7 +462,7 @@ async def submit_feedback(
     event_id =event.id
 
 
-    existing_feedback = db.query(Feedback).filter(Feedback.user_id == user_id).filter(Feedback.presentation_id == presentation_id).one()
+    existing_feedback = db.query(Feedback).filter(Feedback.user_id == user_id).filter(Feedback.presentation_id == presentation_id).one_or_none()
 
     if existing_feedback is not None:
         existing_feedback.would_use = would_use

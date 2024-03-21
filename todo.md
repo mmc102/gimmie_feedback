@@ -10,6 +10,7 @@ add location to the event
 misc:
 
 fix url in event card not being clickable
-consider making email optional 
+consider making email optional
 add an icon to show that you left feedback for a presentation
 i think there is still something weird about the user sessions
+clean up unused html
