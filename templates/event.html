@@ -4,21 +4,20 @@
 
 {% block content %}
 
-{% include 'user_banner.html' %}
 
-<div class="container mx-auto py-8">
+<div class="container mx-auto p-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ event.name }}</h1>
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">Demos</h1>
 
     {% if presentations %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 mx-auto sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {% for presentation in presentations %}
         <div class="bg-white shadow-md rounded-md p-4">
             <h2 class="text-2xl font-bold text-gray-800">{{ presentation.name }}</h2>
             <p class="text-xl text-gray-600">{{ presentation.tagline }}</p>
-            <p class="text-gray-600">{{ presentation.url }}</p>
+            <a href="{{presentation.url}}" class="text-blue-600">{{ presentation.url }}</a>
             <p class="text-gray-600">{{ presentation.email }}</p>
-            <button type="button" onclick="removePresentation(this)" class="mt-2 bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded">Review Product</button>
+            <a href="/presentations/feedback/{{ presentation.id }}" class="mt-2 bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded inline-block">Review Product</a>
+
         </div>
         {% endfor %}
     </div>

@@ -1,11 +1,11 @@
 from fastapi import FastAPI, HTTPException, Request, Form, Depends
+from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.security import APIKeyCookie
 import hashlib
 import os
 from sqlalchemy import UniqueConstraint
 from datetime import datetime
-from typing import Optional
 
 import uuid
 from fastapi.responses import RedirectResponse
@@ -67,7 +67,6 @@ class Feedback(Base):
     presentation_id = Column(Integer, ForeignKey("presentations.id"))
     user_id = Column(String, ForeignKey("users.id"))
     would_use = Column(Boolean)
-    dont_care = Column(Boolean)
     would_invest = Column(Boolean)
     would_work = Column(Boolean)
     comment = Column(String)
@@ -97,11 +96,13 @@ Base.metadata.create_all(bind=engine)
 
 
 def get_session(request: Request):
-    val=  request.session
-    return val
+    return request.session
 
-def get_current_user(session: dict = Depends(get_session)) -> Optional[dict]:
+# TODO this should be a wrapper on the ORM object, not the object itself
+def get_current_user(session: dict = Depends(get_session)) -> User |None:
     val = session.get("user")
+    if val is not None:
+        return User(id=val["user_id"], email_address=val["email"])
     return val
 
 class PresentationFeedback(BaseModel):
@@ -120,48 +121,42 @@ class EventModel(BaseModel):
         orm_mode = True
 
 
-@app.get("/user/{event_id}")
-async def get_user(request: Request, event_id: int):
+@app.get("/user/")
+async def get_user(request: Request):
+    orignal_referer = request.headers.get("referer")
+    print(orignal_referer)
     return templates.TemplateResponse(
         "user_template.html",
         {
             "request": request,
-            "event_id": event_id
+            "original_referer": orignal_referer,
         },
     )
 
 
-@app.post("/user/{event_id}")
+@app.post("/create_user/")
 async def submit_user(
         request: Request,
-        event_id: int ,
         email: str = Form(""),
         can_email: bool = Form(False),
+        original_referer: str = Form(''),
         session = Depends(get_session)
+
 ):
 
     db = SessionLocal()
 
     user = User(email_address=email, can_email=can_email)
 
-    event = db.query(Event).filter(Event.id == event_id).one()
-    presentations = [row for row in db.query(Presentation).filter(Presentation.event_id == event_id)]
 
     db.add(user)
     db.commit()
 
-    user_id = user.id
-    user_email = user.email_address
     session["user"] = {"user_id": user.id, "email": user.email_address}
 
 
-    return templates.TemplateResponse(
-        "generate_presentations_template.html",
-        {"request": request, "event": event, "presentations": presentations, "user_id":user_id, "user_email": user_email},
-
-    )
-
-
+    redirect_to = original_referer if not original_referer.endswith("/user/") else "/" 
+    return RedirectResponse(redirect_to, status_code=303)
 
 @app.get("/edit_event/")
 async def edit_event(
@@ -187,6 +182,18 @@ async def edit_event(
     )
 
 
+
+def return_error_response(request,message:str):
+    return templates.TemplateResponse(
+        "error.html",
+        {"request": request, "message": message},
+        status_code=401,  # Unauthorized status code
+    )
+
+
+
+
+
 @app.get("/event_unlock/")
 async def event_unlock(
         request: Request,
@@ -206,13 +213,7 @@ async def event_unlock(
         )
 
     else:
-        # Return an error response for wrong password
-        return templates.TemplateResponse(
-            "error.html",
-            {"request": request, "message": "Incorrect password. Please try again."},
-            status_code=401,  # Unauthorized status code
-        )
-
+        return return_error_response(request, "Incorrect password. Please try again.")
 
 @app.get("/event_unlock/{event_id}")
 async def event_unlock_get(
@@ -245,6 +246,8 @@ async def landing_page(request: Request):
     )
 
 
+
+# Deprecated
 @app.get("/home")
 async def home_page(request: Request, user_id: str | None = None):
     db = SessionLocal()
@@ -275,16 +278,8 @@ async def get_event(request: Request, event_id: int,
     presentations = None if len([r for r in presentations]) == 0 else presentations
 
     return templates.TemplateResponse(
-        "generate_presentations_template.html",
+        "event.html",
         {"request": request, "event": event, "presentations": presentations},
-    )
-
-
-@app.get("/create_event/")
-async def make_event(request: Request):
-    return templates.TemplateResponse(
-        "event_template.html",
-        {"request": request},
     )
 
 
@@ -292,6 +287,17 @@ async def make_event(request: Request):
 async def make_about(request: Request):
     return templates.TemplateResponse(
         "about.html",
+        {"request": request},
+    )
+
+
+
+
+
+@app.get("/create_event/")
+async def make_event(request: Request):
+    return templates.TemplateResponse(
+        "event_template.html",
         {"request": request},
     )
 
@@ -404,31 +410,32 @@ async def create_presentations(
     )
 
 
-@app.get("/presentations/{presentation_id}/{user_id}")
-async def get_presentation(request: Request, presentation_id: int, user_id: str):
+@app.get("/presentations/feedback/{presentation_id}/")
+async def get_presentation(request: Request, presentation_id: int, user=Depends(get_current_user)):
 
     db = SessionLocal()
     presentation = (
         db.query(Presentation).filter(Presentation.id == presentation_id).one_or_none()
     )
-
-    existing_feedback = (
-        db.query(Feedback)
-        .filter(Feedback.presentation_id == presentation_id)
-        .filter(Feedback.user_id == user_id)
-        .first()
-    )
     if not presentation:
-        print("idk bad thing")
+        return return_error_response(request, "Presentation does not exist.")
+
+    if user is not None:
+        user_id = user.id
+        existing_feedback = (
+            db.query(Feedback)
+            .filter(Feedback.presentation_id == presentation_id)
+            .filter(Feedback.user_id == user_id)
+            .one_or_none()
+        )
+    else:
+        return return_error_response(request, 'you must create an account to leave feedback')
 
     return templates.TemplateResponse(
-        "presentation_template.html",
+        "feedback_form.html",
         {
             "request": request,
-            "presentation_title": presentation.title,
-            "presentation_description": presentation.description,
-            "presentation_id": presentation_id,
-            "user_id": user_id,
+            "presentation" : presentation,
             "existing_feedback": existing_feedback,
         },
     )
@@ -439,22 +446,28 @@ async def submit_feedback(
         request: Request,
         presentation_id: int,
         would_use: bool = Form(False),
-        dont_care: bool = Form(False),
         would_invest: bool = Form(False),
         would_work: bool = Form(False),
         comment: str = Form(""),
-        user_id: str = Form(""),
-        feedback_id: Optional[int] = Form(None),
+        user = Depends(get_current_user),
 ):
+
+    if user is None:
+        return return_error_response(request, "You need to be logged in to give feedback")
+
+    user_id = user.id
+
     db = SessionLocal()
 
-    if feedback_id is not None:
-        existing_feedback = db.query(Feedback).get(feedback_id)
-        if existing_feedback is None:
-            return HTTPException(status_code=404, detail="Feedback not found")
 
+    event = db.query(Event).join(Presentation,Presentation.event_id ==Event.id).filter(Presentation.id == presentation_id).one()
+    event_id =event.id
+
+
+    existing_feedback = db.query(Feedback).filter(Feedback.user_id == user_id).filter(Feedback.presentation_id == presentation_id).one()
+
+    if existing_feedback is not None:
         existing_feedback.would_use = would_use
-        existing_feedback.dont_care = dont_care
         existing_feedback.would_invest = would_invest
         existing_feedback.would_work = would_work
         existing_feedback.comment = comment
@@ -462,7 +475,6 @@ async def submit_feedback(
         feedback = Feedback(
             presentation_id=presentation_id,
             would_use=would_use,
-            dont_care=dont_care,
             user_id=user_id,
             would_invest=would_invest,
             would_work=would_work,
@@ -474,7 +486,7 @@ async def submit_feedback(
     db.commit()
     db.close()
 
-    return RedirectResponse(url="/home?user_id={}".format(user_id), status_code=303)
+    return RedirectResponse(url=f"/events/{event_id}", status_code=303)
 
 
 def hash_password(password: str):

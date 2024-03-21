@@ -1,13 +1,15 @@
 do i need to close out all the db sessions?
 
+dev ops:
+add redirect on http
+
 db changes:
 add location to the event
-add event_id to the user table so users are tied to the event
-consider adding a user_id to the event so that the logged in user can edit the event
 
-app flow:
-
-make sure people can get to the reviews page from the event
 
 misc:
-fix some of the redirect logic
+
+fix url in event card not being clickable
+consider making email optional 
+add an icon to show that you left feedback for a presentation
+i think there is still something weird about the user sessions

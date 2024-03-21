@@ -1,17 +1,13 @@
-
 {% block banner %}
-<div id="dismissable-banner" class="bg-blue-100 border-t-4 flex flex-row justify-space-between border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
+<div id="dismissable-banner" class="bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
     <p class="text-lg text-gray-700">
-        {% if user_id %}
-        Hi, {{ user_email }} 👋
+        {% if user_id in request.session.user %}
+        Hi, {{request.session.user.email }} 👋
         {% else %}
         Create a (very minimal) user to leave feedback!
 
     </p>
-    <form action="/user/{{ event.id }}" method="GET">
-        <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create User</button>
-    </form>
-
+    <a href="/user/" class="mt-2 bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded inline-block">Create User</a>
     {% endif %}
 </div>
 <script>
