@@ -18,8 +18,8 @@
                     </div>
                     <div class="flex items-center">
                         <ul class="flex space-x-4">
-                            <p class="text-lg text-gray-700">
-                                {% if user_id in request.session.user %}
+                            <p class="text-lg text-white">
+                                {% if request.session.user.email %}
                                 Hi, {{request.session.user.email }} 👋
                             </p>
                             {% else %}
