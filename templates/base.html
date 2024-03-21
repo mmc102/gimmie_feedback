@@ -18,9 +18,10 @@
                     </div>
                     <div class="flex items-center">
                         <ul class="flex space-x-4">
-                            <p class="text-lg text-white">
-                                {% if request.session.user and request.session.user.email %}
-                                Hi, {{request.session.user.email }} 👋
+
+                            {% if request.session.user and request.session.user.email %}
+                            <p class="text-sm p-3 rounded bg-white text-black">
+                                {{ request.session.user.email }}
                             </p>
                             {% else %}
                             <a href="/user/" class="mt-2 bg-red-500 hover:bg-red-800 text-white px-4 py-2 rounded inline-block">Create User</a>
@@ -30,8 +31,24 @@
                 </div>
             </div>
         </nav>
+        {% if message %}
+        <div id="dismissableAlert" class=" bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
+            <p class="font-bold">{{ message }}</p>
+        </div>
+        <script>
+         // Automatically dismiss the alert after 5 seconds
+         setTimeout(function() {
+             var dismissableAlert = document.getElementById("dismissableAlert");
+             if (dismissableAlert) {
+                 dismissableAlert.remove();
+             }
+         }, 5000); // 5000 milliseconds = 5 seconds
+        </script>
 
+
+        {% endif %}
         <div class="content">
+
 
             {% block content %}{% endblock %}
         </div>
