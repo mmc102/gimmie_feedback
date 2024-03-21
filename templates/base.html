@@ -19,7 +19,7 @@
                     <div class="flex items-center">
                         <ul class="flex space-x-4">
                             <p class="text-lg text-white">
-                                {% if request.session.user.email %}
+                                {% if request.session.user and request.session.user.email %}
                                 Hi, {{request.session.user.email }} 👋
                             </p>
                             {% else %}
