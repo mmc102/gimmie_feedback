@@ -44,7 +44,7 @@
                 <tr class="presentation">
 
 
-                    <td class="px-4 py-2"><input type="hidden" name="presentation_ids" class="border border-gray-300 px-4 py-2 w-full" value="-1"></td>
+                    <td class="px-4 py-2"><input type="hidden" name="presentation_ids" class="border border-gray-300 px-4 py-2 w-full" value=""></td>
                     <td class="px-4 py-2"><input type="text" name="names" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
                     <td class="px-4 py-2"><input type="text" name="taglines" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
                     <td class="px-4 py-2"><input type="email" name="emails" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
@@ -71,7 +71,7 @@
 
      const inputs = newPresentationRow.querySelectorAll("input");
      inputs.forEach(input => {
-         input.value = "";  
+         input.value = "";
      });
 
      presentationTable.appendChild(newPresentationRow);

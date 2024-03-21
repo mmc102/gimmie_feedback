@@ -124,7 +124,6 @@ class EventModel(BaseModel):
 @app.get("/user/")
 async def get_user(request: Request):
     orignal_referer = request.headers.get("referer")
-    print(orignal_referer)
     return templates.TemplateResponse(
         "user_template.html",
         {
@@ -340,7 +339,7 @@ async def create_event(
 async def create_presentations(
         request: Request,
         event_id: int = Form(...),
-        presentation_ids: List[int | None] = Form([]),
+        presentation_ids: List[str] = Form([]),
         names: List[str] = Form([]),
         emails: List[str] = Form([]),
         taglines: List[str] = Form([]),
@@ -348,6 +347,7 @@ async def create_presentations(
 ):
     # TODO this needs to be password protected
 
+    parsed_presentation_ids = [safe_parse_int(id) for id in presentation_ids]
     db = SessionLocal()
 
     event = db.query(Event).filter(Event.id == event_id).one()
@@ -362,7 +362,7 @@ async def create_presentations(
     )
 
     to_delete = [
-        row for row in existing_presentations if str(row.id) not in presentation_ids
+        row for row in existing_presentations if str(row.id) not in parsed_presentation_ids
     ]
 
     for row in to_delete:
@@ -372,9 +372,8 @@ async def create_presentations(
     new_presentations = []
     not_new_presentations = []
     for presentation_id, name, email, tagline, url in zip(
-            presentation_ids, names, emails, taglines, urls
+            parsed_presentation_ids, names, emails, taglines, urls
     ):
-        presentation_id = None if presentation_id == -1 else presentation_id
         if presentation_id is not None:
             presentation = db.query(Presentation).filter(
                 Presentation.id == presentation_id
@@ -396,6 +395,7 @@ async def create_presentations(
     db.add_all(new_presentations)
 
     db.commit()
+    # TODO make a general handler for messages that should pop in a banner
 
     return templates.TemplateResponse(
         "update_presentations_template.html",
@@ -427,7 +427,16 @@ async def get_presentation(request: Request, presentation_id: int, user=Depends(
             .one_or_none()
         )
     else:
-        return return_error_response(request, 'you must create an account to leave feedback')
+        return templates.TemplateResponse(
+            "user_template.html",
+            {
+                "request": request,
+                "original_referer": str(request.url),
+            },
+        )
+
+
+
 
     return templates.TemplateResponse(
         "feedback_form.html",
@@ -489,3 +498,11 @@ async def submit_feedback(
 
 def hash_password(password: str):
     return hashlib.sha256(password.strip().encode()).hexdigest()
+
+
+def safe_parse_int(string)->int|None:
+    try:
+        val= int(string)
+        return val
+    except Exception:
+        return None
