@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.security import APIKeyCookie
 import hashlib
 import os
+import html
 from sqlalchemy import UniqueConstraint
 from datetime import datetime
 
@@ -175,7 +176,7 @@ async def edit_event(
     )
 
 
-@app.post("/event_unlock/")
+@app.get("/event_unlock_submit/")
 async def event_unlock(
         request: Request,
         event_id: str,
@@ -183,12 +184,19 @@ async def event_unlock(
 ):
     db = SessionLocal()
 
+
+
     event = db.query(Event).filter(Event.id == event_id).one()
     presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
     presentations = [row for row in presentations] or None
 
     hashed_password = hash_password(password)
     if hashed_password == event.password:
+
+        # set the token
+        get_session(request)["event"] = hashed_password
+
+
         return RedirectResponse(
             url=f"/edit_event/?event_id={event_id}&m={hashed_password}"
         )
@@ -338,18 +346,25 @@ async def create_presentations(
 
     # Create presentations
     new_presentations = []
+    print("here")
     for presentation_id, name, email, tagline, url in zip(
             parsed_presentation_ids, names, emails, taglines, urls
     ):
+
+
+        url = html.escape(url)
+
+        #gracefully handle an invalid id by just creating a new event
+        presentation: Presentation | None = None
         if presentation_id is not None:
             presentation = db.query(Presentation).filter(
-                Presentation.id == presentation_id
-            )
+                Presentation.id == presentation_id).one_or_none()
+
+        if presentation is not None:
             presentation.name = name
             presentation.email = email
             presentation.tagline = tagline
             presentation.url = url
-
         else:
             presentation = Presentation(
                 name=name, email=email, tagline=tagline, url=url, event_id=event_id
@@ -505,3 +520,9 @@ def get_upcomming_events()->list[Event]:
             without_old.append(event)
 
     return without_old
+
+
+
+
+
+
