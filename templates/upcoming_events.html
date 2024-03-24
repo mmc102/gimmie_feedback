@@ -11,17 +11,18 @@
     {% if events %}
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
         {% for event in events %}
-        <div class="bg-white shadow-md rounded-md p-4 hover:bg-blue-100 transition duration-300">
-            <a href="/events/{{ event.id }}" class="block font-semibold">{{ event.location }}</a>
-            <a href="/events/{{ event.id }}" class="block font-semibold">{{ event.name }}</a>
-            <p class="text-gray-600 mt-2">{{ event.date }}</p>
-        </div>
+        <a href="/events/{{ event.id }}" class="block">
+            <div class="bg-white shadow-md rounded-md p-4 hover:bg-blue-100 transition duration-300">
+                <p class="font-semibold">{{ event.location }}</p>
+                <p class="font-semibold">{{ event.name }}</p>
+                <p class="text-gray-600 mt-2">{{ event.date }}</p>
+            </div>
+        </a>
         {% endfor %}
     </div>
 
 
     {% else %}
-    <
     <p class="text-lg text-gray-700">No upcoming events found.</p>
     {% endif %}
 

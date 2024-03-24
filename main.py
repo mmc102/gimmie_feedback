@@ -294,6 +294,7 @@ async def create_event(
     private = bool(private)
     db = SessionLocal()
     hashed = hash_password(password)
+
     event = Event(name=event_name, date=date, password=hashed, location=location, time=time, private=private)
 
     db.add(event)
