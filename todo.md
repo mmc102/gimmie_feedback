@@ -22,11 +22,11 @@ fix url in event card not being clickable
 
 consider making email optional
 
-filter out old event from dashboard
-
 consider making a get_user_or_fail function for "protected" routes
 
 make an event pannel that shows the submitted feedback so far
 
 do people need access to the event page after the event? 
 probably not, just send them a report
+
+add a logo

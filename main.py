@@ -40,20 +40,21 @@ Base = declarative_base()
 # Define SQLAlchemy models
 class Event(Base):
     __tablename__ = "events"
-
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, index=True)
-    date = Column(String)
-    private = Column(Boolean)
-    password = Column(String)
-    location = Column(String)
+    # this is probably reckless
+    date = Column(String, nullable=False)
+    time = Column(String, nullable=False)
+    private = Column(Boolean, nullable=False)
+    password = Column(String, nullable=True)
+    location = Column(String,nullable=False)
 
 
 class Presentation(Base):
     __tablename__ = "presentations"
 
     id = Column(Integer, primary_key=True, index=True)
-    event_id = Column(Integer, ForeignKey("events.id"))
+    event_id = Column(String, ForeignKey("events.id"))
     name = Column(String)
     tagline = Column(String)
     email = Column(String)
@@ -107,9 +108,6 @@ def get_current_user(session: dict = Depends(get_session)) -> User | None:
     if val is not None:
         return User(id=val["user_id"], email_address=val["email"])
     return val
-
-
-
 
 
 @app.get("/user/")
@@ -278,16 +276,18 @@ async def browse_events(request: Request):
 async def create_event(
         request: Request,
         event_name: str = Form(""),
-        password: str = Form(""),
-        time: str = Form(""),
+        password: str | None = Form(None),
+        date: str = Form(...),
+        time: str = Form(...),
         location: str = Form(""),
+        private: bool | None = Form(None),
         session=Depends(get_session),
 ):
 
+    private = bool(private)
     db = SessionLocal()
-    print(time)
     hashed = hash_password(password)
-    event = Event(name=event_name, date=time, password=hashed, location=location)
+    event = Event(name=event_name, date=date, password=hashed, location=location, time=time)
 
     db.add(event)
     db.commit()
@@ -466,7 +466,9 @@ async def submit_feedback_form(
     )
 
 
-def hash_password(password: str):
+def hash_password(password: str | None)-> str | None:
+    if password is None:
+        return None
     return hashlib.sha256(password.strip().encode()).hexdigest()
 
 
