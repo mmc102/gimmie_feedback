@@ -146,7 +146,7 @@ async def submit_user(
 
 @app.get("/edit_event/")
 async def edit_event(
-        request: Request, event_id: int, message: str | None = None, session=Depends(get_session)
+        request: Request, event_id: str, message: str | None = None, session=Depends(get_session)
 ):
 
     event_token = session.get("event")
@@ -178,7 +178,7 @@ async def edit_event(
 @app.post("/event_unlock/")
 async def event_unlock(
         request: Request,
-        event_id: int,
+        event_id: str,
         password: str,
 ):
     db = SessionLocal()
@@ -200,7 +200,7 @@ async def event_unlock(
 @app.get("/event_unlock/")
 async def event_unlock_get(
         request: Request,
-        event_id: int,
+        event_id: str,
 ):
     db = SessionLocal()
 
@@ -209,7 +209,6 @@ async def event_unlock_get(
         "password.html",
         {"request": request, "event": event},
     )
-
 
 @app.get("/")
 async def landing_page(request: Request):
@@ -223,7 +222,7 @@ async def landing_page(request: Request):
 
 @app.get("/events/{event_id}")
 async def get_event(
-        request: Request, event_id: int, message: str | None = None, user=Depends(get_current_user)
+        request: Request, event_id: str, message: str | None = None, user=Depends(get_current_user)
 ):
 
     db = SessionLocal()
@@ -287,7 +286,7 @@ async def create_event(
     private = bool(private)
     db = SessionLocal()
     hashed = hash_password(password)
-    event = Event(name=event_name, date=date, password=hashed, location=location, time=time)
+    event = Event(name=event_name, date=date, password=hashed, location=location, time=time, private=private)
 
     db.add(event)
     db.commit()
@@ -303,7 +302,7 @@ async def create_event(
 @app.post("/create_presentations")
 async def create_presentations(
         request: Request,
-        event_id: int = Form(...),
+        event_id: str = Form(...),
         presentation_ids: List[str] = Form([]),
         names: List[str] = Form([]),
         emails: List[str] = Form([]),
@@ -487,13 +486,22 @@ def return_error_response(request, message: str):
         status_code=401,  # Unauthorized status code
     )
 
-## DATABASE HELPERS
 
-def get_upcomming_events():
+def get_upcomming_events()->list[Event]:
+    '''return all events that are not private today that have a date of today or in the future'''
     db = SessionLocal()
-    events = [row for row in db.query(Event).filter(Event.date >= datetime.utcnow().isoformat())]
-    for event in db.query(Event):
-        clean_date = event.date[:10]
-        event.date = clean_date
+    today = datetime.now().date()
+    events = [row for row in db.query(Event).filter(~Event.private)]
 
-    return events
+
+    # this is truly pathetic
+    without_old = []
+    for event in events:
+        if event.date.strip() == "":
+            continue
+        elif event.date is None:
+            continue
+        elif datetime.strptime(event.date[:10], "%Y-%m-%d").date() >= today:
+            without_old.append(event)
+
+    return without_old
