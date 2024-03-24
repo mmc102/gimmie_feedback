@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Form, Depends
+from fastapi import FastAPI, Request, Form, Depends
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.security import APIKeyCookie
@@ -10,7 +10,6 @@ from datetime import datetime
 import uuid
 from fastapi.responses import RedirectResponse
 from typing import List
-from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -109,20 +108,7 @@ def get_current_user(session: dict = Depends(get_session)) -> User | None:
     return val
 
 
-class PresentationFeedback(BaseModel):
-    presentation_id: int
-    event_id: int
-    rating: int
-    comment: str
 
-
-class EventModel(BaseModel):
-    id: int
-    name: str
-    date: str
-
-    class Config:
-        orm_mode = True
 
 
 @app.get("/user/")
@@ -228,17 +214,10 @@ async def event_unlock_get(
 
 @app.get("/")
 async def landing_page(request: Request):
-    db = SessionLocal()
-    events = [row for row in db.query(Event)]
-    for event in db.query(Event):
-        clean_date = event.date[:10]
-        event.date = clean_date
-
     return templates.TemplateResponse(
         "landing_template.html",
         context={
             "request": request,
-            "events": events,
         },
     )
 
@@ -281,17 +260,31 @@ async def make_event(request: Request):
     )
 
 
+@app.get("/browse_events/")
+async def browse_events(request: Request):
+
+    events = get_upcomming_events()
+
+    return templates.TemplateResponse(
+        "upcoming_events.html",
+        {"request": request, "events": events},
+    )
+
+
+
+
 @app.post("/create_event/")
 async def create_event(
         request: Request,
         event_name: str = Form(""),
         password: str = Form(""),
+        time: str = Form(""),
         location: str = Form(""),
         session=Depends(get_session),
 ):
 
     db = SessionLocal()
-    time = datetime.now()
+    print(time)
     hashed = hash_password(password)
     event = Event(name=event_name, date=time, password=hashed, location=location)
 
@@ -490,3 +483,14 @@ def return_error_response(request, message: str):
         {"request": request, "message": message},
         status_code=401,  # Unauthorized status code
     )
+
+## DATABASE HELPERS
+
+def get_upcomming_events():
+    db = SessionLocal()
+    events = [row for row in db.query(Event).filter(Event.date >= datetime.utcnow().isoformat())]
+    for event in db.query(Event):
+        clean_date = event.date[:10]
+        event.date = clean_date
+
+    return events

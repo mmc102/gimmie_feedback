@@ -16,8 +16,7 @@ how do i autoscale?
 
 misc:
 
-
-make the landing page make more sense
+add meme to the landing page
 
 fix url in event card not being clickable
 
@@ -28,3 +27,6 @@ filter out old event from dashboard
 consider making a get_user_or_fail function for "protected" routes
 
 make an event pannel that shows the submitted feedback so far
+
+do people need access to the event page after the event? 
+probably not, just send them a report
