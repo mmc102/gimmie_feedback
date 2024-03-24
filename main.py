@@ -257,6 +257,14 @@ async def make_about(request: Request):
         {"request": request},
     )
 
+@app.get("/contact/")
+async def make_contact(request: Request):
+    return templates.TemplateResponse(
+        "contact.html",
+        {"request": request},
+    )
+
+
 
 @app.get("/create_event/")
 async def make_event(request: Request):
