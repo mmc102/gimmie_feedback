@@ -1,4 +1,5 @@
 from collections import defaultdict
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
@@ -24,6 +25,7 @@ templates = Jinja2Templates(directory="templates")
 # Initialize FastAPI app
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 # Define a default value for the database URL
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
