@@ -1,3 +1,4 @@
+from collections import defaultdict
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
@@ -162,8 +163,18 @@ async def edit_event(
     if event_token != event.password:
         return RedirectResponse(url=f"/event_unlock/?event_id={event_id}")
 
-    presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
-    presentations = [row for row in presentations] or None
+    presentations_query = db.query(Presentation).filter(Presentation.event_id == event_id)
+    presentations = [row for row in presentations_query] or None
+    presentation_ids = [row.id for row in presentations_query] or None
+
+    if presentation_ids:
+        feedback_query = db.query(Feedback).filter(Feedback.presentation_id.in_(presentation_ids))
+        feedback = defaultdict(list)
+        for row in feedback_query:
+            feedback[row.event_id].append(feedback)
+
+    else:
+        feedback = {}
 
     return templates.TemplateResponse(
         "update_presentations_template.html",
@@ -172,6 +183,7 @@ async def edit_event(
             "event": event,
             "presentations": presentations,
             "message": message,
+            "feedback": feedback,
         },
     )
 

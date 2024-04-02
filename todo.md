@@ -20,11 +20,12 @@ how do i monitor the traffic?
 
 misc:
 
-add a footer with a contact me
+remove cards
+
+fix alignment on the landing page cards
+
 
 make an event pannel that shows the submitted feedback so far
-
-add meme to the landing page
 
 put datetime objects in the db not these crazy ass strings
 

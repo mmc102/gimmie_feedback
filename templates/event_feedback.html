@@ -1,0 +1,15 @@
+
+
+{% block content %}
+
+<h2>this is the section</h2>
+{% if feedback %}
+{% for feedback_point in feedback %}
+<h1>{{feedback_point}}</h1>
+{% endfor %}
+{% else %}
+<h1>no feedback has been collected yet</h1>
+
+{% endif %}
+
+{% endblock %}

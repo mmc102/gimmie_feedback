@@ -13,8 +13,8 @@
         {% for event in events %}
         <a href="/events/{{ event.id }}" class="block">
             <div class="bg-white shadow-md rounded-md p-4 hover:bg-blue-100 transition duration-300">
-                <p class="font-semibold">{{ event.location }}</p>
                 <p class="font-semibold">{{ event.name }}</p>
+                <p class="font-semibold">{{ event.location }}</p>
                 <p class="text-gray-600 mt-2">{{ event.date }}</p>
             </div>
         </a>
