@@ -168,10 +168,20 @@ async def edit_event(
     presentation_ids = [row.id for row in presentations_query] or None
 
     if presentation_ids:
-        feedback_query = db.query(Feedback).filter(Feedback.presentation_id.in_(presentation_ids))
+        # TODO this code should not use names as keys as they are not constrained in the db
+        assert presentations is not None
+        presentation_name_lookup =  {pres.id: pres.name for pres in presentations}
+
+        feedback_query = db.query(Feedback, User.email_address).join(User, User.id == Feedback.user_id).filter(Feedback.presentation_id.in_(presentation_ids))
         feedback = defaultdict(list)
-        for row in feedback_query:
-            feedback[row.event_id].append(feedback)
+        for row, email_address in feedback_query:
+            row.email = email_address
+            presentation_name = presentation_name_lookup[row.presentation_id]
+            feedback[presentation_name].append(row)
+
+        for presentation_name in presentation_name_lookup.values():
+            if presentation_name not in feedback:
+                feedback[presentation_name] = []
 
     else:
         feedback = {}
