@@ -366,8 +366,6 @@ async def create_presentations(
         db.delete(row)
 
     # Create presentations
-    new_presentations = []
-    print("here")
     for presentation_id, name, email, tagline, url in zip(
             parsed_presentation_ids, names, emails, taglines, urls
     ):
@@ -390,12 +388,8 @@ async def create_presentations(
             presentation = Presentation(
                 name=name, email=email, tagline=tagline, url=url, event_id=event_id
             )
-            new_presentations.append(presentation)
-
-    # Add presentations to the database
-    db.add_all(new_presentations)
-
-    db.commit()
+            db.add(presentation)
+            db.commit()
 
     return RedirectResponse(
         f"/edit_event/?event_id={event.id}&message=successfully updated!",
