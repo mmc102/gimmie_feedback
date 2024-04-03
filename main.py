@@ -51,7 +51,7 @@ class Event(Base):
     time = Column(String, nullable=False)
     private = Column(Boolean, nullable=False)
     password = Column(String, nullable=True)
-    location = Column(String,nullable=False)
+    location = Column(String, nullable=False)
 
 
 class Presentation(Base):
@@ -150,7 +150,10 @@ async def submit_user(
 
 @app.get("/edit_event/")
 async def edit_event(
-        request: Request, event_id: str, message: str | None = None, session=Depends(get_session)
+        request: Request,
+        event_id: str,
+        message: str | None = None,
+        session=Depends(get_session),
 ):
 
     event_token = session.get("event")
@@ -165,16 +168,22 @@ async def edit_event(
     if event_token != event.password:
         return RedirectResponse(url=f"/event_unlock/?event_id={event_id}")
 
-    presentations_query = db.query(Presentation).filter(Presentation.event_id == event_id)
+    presentations_query = db.query(Presentation).filter(
+        Presentation.event_id == event_id
+    )
     presentations = [row for row in presentations_query] or None
     presentation_ids = [row.id for row in presentations_query] or None
 
     if presentation_ids:
         # TODO this code should not use names as keys as they are not constrained in the db
         assert presentations is not None
-        presentation_name_lookup =  {pres.id: pres.name for pres in presentations}
+        presentation_name_lookup = {pres.id: pres.name for pres in presentations}
 
-        feedback_query = db.query(Feedback, User.email_address).join(User, User.id == Feedback.user_id).filter(Feedback.presentation_id.in_(presentation_ids))
+        feedback_query = (
+            db.query(Feedback, User.email_address)
+            .join(User, User.id == Feedback.user_id)
+            .filter(Feedback.presentation_id.in_(presentation_ids))
+        )
         feedback = defaultdict(list)
         for row, email_address in feedback_query:
             row.email = email_address
@@ -208,8 +217,6 @@ async def event_unlock(
 ):
     db = SessionLocal()
 
-
-
     event = db.query(Event).filter(Event.id == event_id).one()
     presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
     presentations = [row for row in presentations] or None
@@ -219,7 +226,6 @@ async def event_unlock(
 
         # set the token
         get_session(request)["event"] = hashed_password
-
 
         return RedirectResponse(
             url=f"/edit_event/?event_id={event_id}&m={hashed_password}"
@@ -242,19 +248,49 @@ async def event_unlock_get(
         {"request": request, "event": event},
     )
 
+
 @app.get("/")
 async def landing_page(request: Request):
+
+    dummy_presentation = {"name": "Logo Madness", "tagline": "So many logos, So  little time"}
+    dummy_feedback = {"comment": "this would absolutely solve my problem if you added the ability for it to send emails", "would_use": True, "would_invest": False, "would_work": False}
+
+    dummy_event_feedback = {
+        "LogoMadness": [
+            {
+                "email": "dog@cat.com",
+                "comment": "this would absolutely solve my problem if you added the ability for it to send emails",
+                "would_use": True,
+                "would_invest": False,
+                "would_work": False,
+            },
+            {
+                "email": "cat@dog.com",
+                "comment": "I have a bunch of development cycles and would love to work on this with you :) ",
+                "would_use": False,
+                "would_invest": False,
+                "would_work": True,
+            }
+        ]
+    }
+
     return templates.TemplateResponse(
         "landing_template.html",
         context={
             "request": request,
+            "existing_feedback": dummy_feedback,
+            "presentation": dummy_presentation,
+            "feedback": dummy_event_feedback,
         },
     )
 
 
 @app.get("/events/{event_id}")
 async def get_event(
-        request: Request, event_id: str, message: str | None = None, user=Depends(get_current_user)
+        request: Request,
+        event_id: str,
+        message: str | None = None,
+        user=Depends(get_current_user),
 ):
 
     db = SessionLocal()
@@ -281,13 +317,13 @@ async def make_about(request: Request):
         {"request": request},
     )
 
+
 @app.get("/contact/")
 async def make_contact(request: Request):
     return templates.TemplateResponse(
         "contact.html",
         {"request": request},
     )
-
 
 
 @app.get("/create_event/")
@@ -309,8 +345,6 @@ async def browse_events(request: Request):
     )
 
 
-
-
 @app.post("/create_event/")
 async def create_event(
         request: Request,
@@ -327,7 +361,14 @@ async def create_event(
     db = SessionLocal()
     hashed = hash_password(password)
 
-    event = Event(name=event_name, date=date, password=hashed, location=location, time=time, private=private)
+    event = Event(
+        name=event_name,
+        date=date,
+        password=hashed,
+        location=location,
+        time=time,
+        private=private,
+    )
 
     db.add(event)
     db.commit()
@@ -382,14 +423,16 @@ async def create_presentations(
             parsed_presentation_ids, names, emails, taglines, urls
     ):
 
-
         url = html.escape(url)
 
-        #gracefully handle an invalid id by just creating a new event
+        # gracefully handle an invalid id by just creating a new event
         presentation: Presentation | None = None
         if presentation_id is not None:
-            presentation = db.query(Presentation).filter(
-                Presentation.id == presentation_id).one_or_none()
+            presentation = (
+                db.query(Presentation)
+                .filter(Presentation.id == presentation_id)
+                .one_or_none()
+            )
 
         if presentation is not None:
             presentation.name = name
@@ -507,7 +550,7 @@ async def submit_feedback_form(
     )
 
 
-def hash_password(password: str | None)-> str | None:
+def hash_password(password: str | None) -> str | None:
     if password is None:
         return None
     return hashlib.sha256(password.strip().encode()).hexdigest()
@@ -529,12 +572,11 @@ def return_error_response(request, message: str):
     )
 
 
-def get_upcomming_events()->list[Event]:
-    '''return all events that are not private today that have a date of today or in the future'''
+def get_upcomming_events() -> list[Event]:
+    """return all events that are not private today that have a date of today or in the future"""
     db = SessionLocal()
     today = datetime.now().date()
     events = [row for row in db.query(Event).filter(~Event.private)]
-
 
     # this is truly pathetic
     without_old = []
@@ -547,9 +589,3 @@ def get_upcomming_events()->list[Event]:
             without_old.append(event)
 
     return without_old
-
-
-
-
-
-

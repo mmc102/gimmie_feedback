@@ -7,52 +7,52 @@
     <h3 class="text-2xl font-bold text-gray-800 mt-8 mb-4">
         Demo Event 🤝 Feedback
     </h3>
+
     <h3 class=" text-xl font-bold text-gray-800 mt-8 mb-4">
-        Collect feedback from a live audiance, sync with the crowd post-event
+        Your audiance members see this:
     </h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Demo Your Product -->
 
-        <div class="bg-white flex justify-center items-center rounded-lg shadow-md p-6">
 
-            <h4 class="font-bold text-lg mb-4">Demo Your Product</h4>
-        </div>
-        <!-- Receive Instant Feedback -->
+    {% include "feedback_component.html" %}
 
-        <div class="bg-white flex justify-center items-center rounded-lg shadow-md p-6">
-            <h4 class="font-bold text-lg mb-4">Collect Listener Feedback</h4>
-        </div>
-        <!-- Connect with Potential Customers -->
 
-        <div class="bg-white flex justify-center items-center rounded-lg shadow-md p-6">
-            <h4 class="font-bold text-lg mb-4">Connect with Customers</h4>
-        </div>
+
+    <h3 class=" text-xl font-bold text-gray-800 mt-8 mb-4">
+        The presenters get to see this:
+    </h3>
+
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        {% include "event_feedback.html" %}
+
     </div>
+
 </div>
 
 <div class="container mx-auto p-8">
     <h3 class="text-2xl font-bold text-gray-800 mt-8 mb-4">
         Perfect For
     </h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white flex justify-center items-center rounded-lg shadow-md p-6">
+    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <li class="rounded-lg p-6">
             <h4 class="font-bold text-lg mb-0">Hackathons</h4>
-        </div>
-        <div class="bg-white flex justify-center items-center rounded-lg shadow-md p-6">
+        </li>
+        <li class="rounded-lg p-6">
             <h4 class="font-bold text-lg mb-0">Local Tech Meetups</h4>
-        </div>
-        <div class="bg-white flex justify-center items-center rounded-lg shadow-md p-6">
+        </li>
+
+        <li class="rounded-lg p-6">
             <h4 class="font-bold text-lg mb-0">Investor Events</h4>
-        </div>
-        <div class="bg-white flex justify-center items-center rounded-lg shadow-md p-6">
+        </li>
+
+        <li class="rounded-lg p-6">
             <h4 class="font-bold text-lg mb-0">Conferences</h4>
-        </div>
-    </div>
+        </li>
+    </ul>
+
 </div>
 
 
 <div class="container mx-auto p-8">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4 pt-6">Next Steps</h2>
     <div class="flex flex-row p-4 space-x-4">
         <a href="/create_event" class="block max-w-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 text-center">Create Event</a>
 
