@@ -50,8 +50,10 @@ class Event(Base):
     date = Column(String, nullable=False)
     time = Column(String, nullable=False)
     private = Column(Boolean, nullable=False)
+    approved = Column(Boolean, nullable=False)
     password = Column(String, nullable=True)
     location = Column(String, nullable=False)
+
 
 
 class Presentation(Base):
@@ -91,6 +93,7 @@ class User(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     email_address = Column(String, nullable=True)
     can_email = Column(Boolean, nullable=False)
+    newsletter = Column(Boolean, nullable=False)
 
 
 # Define relationships
@@ -131,13 +134,14 @@ async def submit_user(
         request: Request,
         email: str = Form(""),
         can_email: bool = Form(False),
+        newsletter: bool = Form(False),
         original_referer: str = Form(""),
         session=Depends(get_session),
 ):
 
     db = SessionLocal()
 
-    user = User(email_address=email, can_email=can_email)
+    user = User(email_address=email, can_email=can_email, newsletter=newsletter)
 
     db.add(user)
     db.commit()
@@ -361,6 +365,7 @@ async def create_event(
     db = SessionLocal()
     hashed = hash_password(password)
 
+    is_approved = True if private else False # public events get moderated
     event = Event(
         name=event_name,
         date=date,
@@ -368,7 +373,9 @@ async def create_event(
         location=location,
         time=time,
         private=private,
+        approved=is_approved,
     )
+
 
     db.add(event)
     db.commit()
@@ -573,10 +580,10 @@ def return_error_response(request, message: str):
 
 
 def get_upcomming_events() -> list[Event]:
-    """return all events that are not private today that have a date of today or in the future"""
+    """return all events that are not private and approved that have a date of today or in the future"""
     db = SessionLocal()
     today = datetime.now().date()
-    events = [row for row in db.query(Event).filter(~Event.private)]
+    events = [row for row in db.query(Event).filter(~Event.private).filter(Event.approved)]
 
     # this is truly pathetic
     without_old = []
