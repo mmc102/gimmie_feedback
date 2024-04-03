@@ -3,37 +3,45 @@
 {% block title %}Home Page{% endblock %}
 
 {% block content %}
-<div class="container mx-auto p-8">
+<div class="container flex flex-col items-center mx-auto px-8">
     <h3 class="text-2xl font-bold text-gray-800 mt-8 mb-4">
-        SIMPLE INFRASTRUCTURE FOR COLLECTING FEEDBACK ON ... ANYTHING
+        BORING TECH FOR COLLECTING FEEDBACK ON ... ANYTHING
     </h3>
 
 
     <h3 class=" text-xl font-bold text-slate-600 mt-8 mb-4">
-        Your Audience sees
+        Your audience interacts with
     </h3>
 
-
-    {% include "feedback_component.html" %}
+    <div class="max-w-lg">
+        {% include "feedback_component.html" %}
+    </div>
 
 
     <h3 class=" text-xl font-bold text-slate-600 mt-8 mb-4">
         Your presenters see
     </h3>
-
-
-
-    {% include "event_feedback.html" %}
 </div>
 
-<div class="flex flex-col p-8 justify-center items-center">
+
+<div class="px-8 min-w-full">
+    <div class="max-w-6xl mx-auto">
+        {% include "event_feedback.html" %}
+    </div>
+</div>
+
+
+
+<div class="container flex flex-col items-center mx-auto px-8">
+    <h3 class=" text-xl font-bold text-slate-600 mt-8 mb-4">
+        What happens
+    </h3>
+
+
     <img src="static/meme.jpg" alt="a meme about feedback" style="max-height: 600px" class="m-4 rounded-lg">
 
     <h4 class="font-semibold text-sm mb-2">A meme from the incredible <a class="underline" href="https://twitter.com/iamjasonlevin"><em>@iamjasonlevin</em></a></h4>
-</div>
 
-
-<div class="container mx-auto p-8">
     <div class="flex flex-row p-4 space-x-4">
         <a href="/create_event" class="block max-w-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 text-center">Create Event</a>
 
