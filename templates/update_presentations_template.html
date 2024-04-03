@@ -1,18 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Home Page{% endblock %}
+{% block title %}Edit {{event.name}}{% endblock %}
 
 {% block content %}
-
 
 
 
 <div class="container mx-auto py-8">
 
     <h1 class="text-3xl font-bold text-gray-800 mb-4">{{event.name}}</h1>
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">{{event.location}}</h1>
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">{{event.date}}</h1>
-
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-map-marker-alt mr-2"></i>{{ event.location }}
+    </h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-calendar-day mr-2"></i>{{ event.date }}
+    </h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">{% if not event.approved %} Not {%endif %} Mod Approved</h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">{% if event.private %} Private {%else %} Public {% endif %} Event</h1>
+    <a class="text-2xl font-bold text-blue-500 mb-4 underline" href={{event.url}}>{{event.url}}</a>
+    <h1 class="text-l font-bold text-gray-800 mb-4">(Those with the url can give feedback on the presentations)</h1>
 
     <h1 class="text-3xl font-bold text-gray-800 mb-4">Add Presenters</h1>
 

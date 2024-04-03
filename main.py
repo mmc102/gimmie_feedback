@@ -18,7 +18,6 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 from fastapi.templating import Jinja2Templates
 
-
 templates = Jinja2Templates(directory="templates")
 
 
@@ -29,6 +28,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Define a default value for the database URL
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+assert SQLALCHEMY_DATABASE_URL is not None
+TESTING = "local" in SQLALCHEMY_DATABASE_URL
+print(TESTING)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -53,6 +55,11 @@ class Event(Base):
     approved = Column(Boolean, nullable=False)
     password = Column(String, nullable=True)
     location = Column(String, nullable=False)
+
+
+    @property
+    def url(self)->str:
+        return f'{base_url()}/events/{self.id}'
 
 
 
@@ -299,6 +306,10 @@ async def get_event(
 
     db = SessionLocal()
     event = db.query(Event).filter(Event.id == event_id).one_or_none()
+
+    if not event.approved:
+        return return_error_response(request, "This event has not been approved")
+
     presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
 
     presentations = None if len([r for r in presentations]) == 0 else presentations
@@ -596,3 +607,11 @@ def get_upcomming_events() -> list[Event]:
             without_old.append(event)
 
     return without_old
+
+
+
+def base_url()->str:
+    if TESTING:
+        return "http://0.0.0.0:8000"
+    else:
+        return "https://reallygreatfeedback.com"

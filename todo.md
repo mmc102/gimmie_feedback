@@ -17,16 +17,17 @@ how do i monitor the traffic?
 
 misc:
 
+require an account to create an event
+
+oauth ..?
+
+send email to event creator
+
 add a logo
 
-add a mod queue
-
-add a share link to events
-
 how do people find private events beyond share link?
-does it need to be typeable?
 
-add an admin page (just use raw postgres commands...)
+does it need to be typeable?
 
 fix footer so it stay at the bottom of the page
 
@@ -36,7 +37,6 @@ add export to excel
 
 put datetime objects in the db not these crazy ass strings
 
-send email to event creator
 
 fix headers on pages for the tabs
 
