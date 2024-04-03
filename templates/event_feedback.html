@@ -35,6 +35,7 @@
                             <input type="checkbox" {% if feedback_item.would_work %}checked{% endif %} disabled>
                         </td>
                     </tr>
+
                     {% endfor %}
                 </tbody>
             </table>
@@ -47,5 +48,38 @@
     {% endfor %}
 
 </div>
+
+<script>
+ document.getElementById('exportCsvButton').addEventListener('click', function() {
+     exportToCsv('feedback_data.csv');
+ });
+
+ function exportToCsv(filename) {
+     const table = document.querySelector('table');
+     const headers = Array.from(table.querySelectorAll('thead th')).map(header => header.textContent.trim());
+     const rows = Array.from(table.querySelectorAll('tbody tr'));
+     const rowData = rows.map(row => Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim()));
+     const csvContent = [headers.join(','), ...rowData.map(row => row.join(','))].join('\n');
+     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+     if (navigator.msSaveBlob) {
+         navigator.msSaveBlob(blob, filename);
+     } else {
+         const link = document.createElement('a');
+         if (link.download !== undefined) {
+             // feature detection
+             const url = URL.createObjectURL(blob);
+             link.setAttribute('href', url);
+             link.setAttribute('download', filename);
+             link.style.visibility = 'hidden';
+             document.body.appendChild(link);
+             link.click();
+             document.body.removeChild(link);
+         }
+     }
+ }
+</script>
+
+
 
 {% endblock %}
