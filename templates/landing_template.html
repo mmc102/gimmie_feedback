@@ -5,50 +5,31 @@
 {% block content %}
 <div class="container mx-auto p-8">
     <h3 class="text-2xl font-bold text-gray-800 mt-8 mb-4">
-        Demo Event 🤝 Feedback
+        SIMPLE INFRASTRUCTURE FOR COLLECTING FEEDBACK ON ... ANYTHING
     </h3>
 
-    <h3 class=" text-xl font-bold text-gray-800 mt-8 mb-4">
-        Your audiance members see this:
+
+    <h3 class=" text-xl font-bold text-slate-600 mt-8 mb-4">
+        Your Audience sees
     </h3>
 
 
     {% include "feedback_component.html" %}
 
 
-
-    <h3 class=" text-xl font-bold text-gray-800 mt-8 mb-4">
-        The presenters get to see this:
+    <h3 class=" text-xl font-bold text-slate-600 mt-8 mb-4">
+        Your presenters see
     </h3>
 
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        {% include "event_feedback.html" %}
 
-    </div>
 
+    {% include "event_feedback.html" %}
 </div>
 
-<div class="container mx-auto p-8">
-    <h3 class="text-2xl font-bold text-gray-800 mt-8 mb-4">
-        Perfect For
-    </h3>
-    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <li class="rounded-lg p-6">
-            <h4 class="font-bold text-lg mb-0">Hackathons</h4>
-        </li>
-        <li class="rounded-lg p-6">
-            <h4 class="font-bold text-lg mb-0">Local Tech Meetups</h4>
-        </li>
+<div class="flex flex-col p-8 justify-center items-center">
+    <img src="static/meme.jpg" alt="a meme about feedback" style="max-height: 600px" class="m-4 rounded-lg">
 
-        <li class="rounded-lg p-6">
-            <h4 class="font-bold text-lg mb-0">Investor Events</h4>
-        </li>
-
-        <li class="rounded-lg p-6">
-            <h4 class="font-bold text-lg mb-0">Conferences</h4>
-        </li>
-    </ul>
-
+    <h4 class="font-semibold text-sm mb-2">A meme from the incredible <a class="underline" href="https://twitter.com/iamjasonlevin"><em>@iamjasonlevin</em></a></h4>
 </div>
 
 
@@ -59,4 +40,33 @@
         <a href="/browse_events" class="block max-w-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 text-center">Browse Events</a>
     </div>
 </div>
+
+<div class="container mx-auto p-8">
+
+    <div class="mt-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">FAQ</h3>
+        <div>
+            <h4 class="font-semibold text-lg mb-2">Is this just google forms?</h4>
+
+            <p>You can do everything this site does with google forms yes. The value prop here is a very minimal setup, a more professional presentation, automated post-event emails, and the ability to export to excel / google sheets.  </p>
+        </div>
+        <div class="mt-4">
+            <h4 class="font-semibold text-lg mb-2">Can I change the form to add my own questions?</h4>
+            <p>Yes, if you pay for the premium version, which is comming soon. :) </p>
+        </div>
+        <div class="mt-4">
+            <h4 class="font-semibold text-lg mb-2">Why is my event in a moderation queue?</h4>
+            <p>I personally review the events to make sure people are not using the site for spam, if you make the events private there is no moderation queue.</p>
+        </div>
+        <div class="mt-4">
+            <h4 class="font-semibold text-lg mb-2">Can other people edit the event?</h4>
+            <p>Yes, if you give them the password they should be able to edit the event (presentation lineup and such).</p>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+
 {% endblock %}
