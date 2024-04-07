@@ -127,7 +127,7 @@ async def get_user(request: Request):
         "user_template.html",
         {
             "request": request,
-            "original_referer": orignal_referer,
+            "nriginal_referer": orignal_referer,
         },
     )
 
@@ -304,10 +304,13 @@ async def get_event(
 
     db = SessionLocal()
 
-
     if user is None:
-        return return_error_response(
-            request, "You need to be logged in to give feedback"
+        return templates.TemplateResponse(
+            "user_template.html",
+            {
+                "request": request,
+                "original_referer": str(request.url),
+            },
         )
 
     user_id = user.id
@@ -556,8 +559,12 @@ async def submit_feedback_form(
 ):
 
     if user is None:
-        return return_error_response(
-            request, "You need to be logged in to give feedback"
+        return templates.TemplateResponse(
+            "user_template.html",
+            {
+                "request": request,
+                "original_referer": str(request.url),
+            },
         )
 
     user_id = user.id

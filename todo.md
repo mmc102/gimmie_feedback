@@ -15,6 +15,9 @@ how do i monitor the traffic?
 
 misc:
 
+
+error you need to be logged into to give feedback doest direct to login
+
 confirm basic user flow (not signed in)
 
 why are the divs so big on the listing
