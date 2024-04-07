@@ -32,13 +32,14 @@ assert SQLALCHEMY_DATABASE_URL is not None
 TESTING = "local" in SQLALCHEMY_DATABASE_URL
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False,autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 api_key_cookie = APIKeyCookie(name="session_token")
 
 
 Base = declarative_base()
+
 
 class Event(Base):
     __tablename__ = "events"
@@ -52,11 +53,9 @@ class Event(Base):
     password = Column(String, nullable=True)
     location = Column(String, nullable=False)
 
-
     @property
-    def url(self)->str:
-        return f'{base_url()}/events/{self.id}'
-
+    def url(self) -> str:
+        return f"{base_url()}/events/{self.id}"
 
 
 class Presentation(Base):
@@ -134,12 +133,12 @@ async def get_user(request: Request):
 
 @app.post("/create_user/")
 async def submit_user(
-        request: Request,
-        email: str = Form(""),
-        can_email: bool = Form(False),
-        newsletter: bool = Form(False),
-        original_referer: str = Form(""),
-        session=Depends(get_session),
+    request: Request,
+    email: str = Form(""),
+    can_email: bool = Form(False),
+    newsletter: bool = Form(False),
+    original_referer: str = Form(""),
+    session=Depends(get_session),
 ):
 
     db = SessionLocal()
@@ -157,10 +156,10 @@ async def submit_user(
 
 @app.get("/edit_event/")
 async def edit_event(
-        request: Request,
-        event_id: str,
-        message: str | None = None,
-        session=Depends(get_session),
+    request: Request,
+    event_id: str,
+    message: str | None = None,
+    session=Depends(get_session),
 ):
 
     event_token = session.get("event")
@@ -175,12 +174,13 @@ async def edit_event(
     if event_token != event.password:
         return RedirectResponse(url=f"/event_unlock/?event_id={event_id}")
 
-    presentations_query = db.query(Presentation).filter(
-        Presentation.event_id == event_id
-    ).order_by(Presentation.order)
+    presentations_query = (
+        db.query(Presentation)
+        .filter(Presentation.event_id == event_id)
+        .order_by(Presentation.order)
+    )
     presentations = [row for row in presentations_query] or None
     presentation_ids = [row.id for row in presentations_query] or None
-
 
     if presentation_ids:
         # TODO this code should not use names as keys as they are not constrained in the db
@@ -219,9 +219,9 @@ async def edit_event(
 
 @app.get("/event_unlock_submit/")
 async def event_unlock(
-        request: Request,
-        event_id: str,
-        password: str,
+    request: Request,
+    event_id: str,
+    password: str,
 ):
     db = SessionLocal()
 
@@ -245,8 +245,8 @@ async def event_unlock(
 
 @app.get("/event_unlock/")
 async def event_unlock_get(
-        request: Request,
-        event_id: str,
+    request: Request,
+    event_id: str,
 ):
     db = SessionLocal()
 
@@ -260,8 +260,16 @@ async def event_unlock_get(
 @app.get("/")
 async def landing_page(request: Request):
 
-    dummy_presentation = {"name": "Logo Madness", "tagline": "So many logos, So  little time"}
-    dummy_feedback = {"comment": "this would absolutely solve my problem if you added the ability for it to send emails", "would_use": True, "would_invest": False, "would_work": False}
+    dummy_presentation = {
+        "name": "Logo Madness",
+        "tagline": "So many logos, So  little time",
+    }
+    dummy_feedback = {
+        "comment": "this would absolutely solve my problem if you added the ability for it to send emails",
+        "would_use": True,
+        "would_invest": False,
+        "would_work": False,
+    }
 
     dummy_event_feedback = {
         "LogoMadness": [
@@ -278,7 +286,7 @@ async def landing_page(request: Request):
                 "would_use": False,
                 "would_invest": False,
                 "would_work": True,
-            }
+            },
         ]
     }
 
@@ -295,11 +303,11 @@ async def landing_page(request: Request):
 
 @app.get("/events/{event_id}")
 async def get_event(
-        request: Request,
-        event_id: str,
-        message: str | None = None,
-        user=Depends(get_current_user),
-        session=Depends(get_session),
+    request: Request,
+    event_id: str,
+    message: str | None = None,
+    user=Depends(get_current_user),
+    session=Depends(get_session),
 ):
 
     db = SessionLocal()
@@ -328,21 +336,26 @@ async def get_event(
     if event_token == event.password:
         show_edit_button = True
 
+    query = (
+        db.query(Presentation)
+        .filter(Presentation.event_id == event_id)
+        .order_by(Presentation.order)
+    )
 
-    query = db.query(Presentation).filter(Presentation.event_id == event_id).order_by(Presentation.order)
-
-    feedback_query = db.query(Feedback.presentation_id).join(Presentation, Presentation.id == Feedback.presentation_id).filter(Presentation.event_id == event_id).filter(Feedback.user_id == user_id)
+    feedback_query = (
+        db.query(Feedback.presentation_id)
+        .join(Presentation, Presentation.id == Feedback.presentation_id)
+        .filter(Presentation.event_id == event_id)
+        .filter(Feedback.user_id == user_id)
+    )
 
     has_feedback_set = {row.presentation_id for row in feedback_query}
-
 
     presentations = []
     for presentation in query:
         presentation.has_feedback = presentation.id in has_feedback_set
 
         presentations.append(presentation)
-
-
 
     presentations = None if len(presentations) == 0 else presentations
 
@@ -386,7 +399,20 @@ async def browse_events(request: Request):
 
 
 @app.get("/create_event/")
-async def make_event(request: Request):
+async def make_event(
+    request: Request,
+    user=Depends(get_current_user),
+):
+
+    if user is None:
+        return templates.TemplateResponse(
+            "user_template.html",
+            {
+                "request": request,
+                "original_referer": str(request.url),
+            },
+        )
+
     return templates.TemplateResponse(
         "event_template.html",
         {"request": request},
@@ -395,22 +421,22 @@ async def make_event(request: Request):
 
 @app.post("/create_event/")
 async def create_event(
-        request: Request,
-        event_name: str = Form(""),
-        password: str | None = Form(None),
-        date: str = Form(...),
-        time: str = Form(...),
-        location: str = Form(""),
-        private: bool | None = Form(None),
-        session=Depends(get_session),
-        user=Depends(get_current_user),
+    request: Request,
+    event_name: str = Form(""),
+    password: str | None = Form(None),
+    date: str = Form(...),
+    time: str = Form(...),
+    location: str = Form(""),
+    private: bool | None = Form(None),
+    session=Depends(get_session),
+    user=Depends(get_current_user),
 ):
 
     private = bool(private)
     db = SessionLocal()
     hashed = hash_password(password)
 
-    is_approved = True if private else False # public events get moderated
+    is_approved = True if private else False  # public events get moderated
     event = Event(
         name=event_name,
         date=date,
@@ -434,14 +460,14 @@ async def create_event(
 
 @app.post("/create_presentations")
 async def create_presentations(
-        request: Request,
-        event_id: str = Form(...),
-        presentation_ids: List[str] = Form([]),
-        names: List[str] = Form([]),
-        emails: List[str] = Form([]),
-        taglines: List[str] = Form([]),
-        urls: List[str] = Form([]),
-        session=Depends(get_session),
+    request: Request,
+    event_id: str = Form(...),
+    presentation_ids: List[str] = Form([]),
+    names: List[str] = Form([]),
+    emails: List[str] = Form([]),
+    taglines: List[str] = Form([]),
+    urls: List[str] = Form([]),
+    session=Depends(get_session),
 ):
 
     token = session.get("event")
@@ -469,11 +495,10 @@ async def create_presentations(
     for row in to_delete:
         db.delete(row)
 
-
     #  using zip longest for orders but this is sketchy
-    for order, (presentation_id, name, email, tagline, url) in enumerate(zip_longest(
-            parsed_presentation_ids, names, emails, taglines, urls
-    ), start=1):
+    for order, (presentation_id, name, email, tagline, url) in enumerate(
+        zip_longest(parsed_presentation_ids, names, emails, taglines, urls), start=1
+    ):
 
         url = html.escape(url)
 
@@ -487,17 +512,20 @@ async def create_presentations(
             )
 
         if presentation is not None:
-            presentation.order= order
+            presentation.order = order
             presentation.name = name
             presentation.email = email
             presentation.tagline = tagline
             presentation.url = url
         else:
             presentation = Presentation(
-                name=name, email=email, tagline=tagline, url=url, event_id=event_id, order=order
+                name=name,
+                email=email,
+                tagline=tagline,
+                url=url,
+                event_id=event_id,
+                order=order,
             )
-
-
 
         db.add(presentation)
         db.commit()
@@ -510,7 +538,7 @@ async def create_presentations(
 
 @app.get("/presentations/feedback/{presentation_id}/")
 async def get_feedback_form(
-        request: Request, presentation_id: int, user=Depends(get_current_user)
+    request: Request, presentation_id: int, user=Depends(get_current_user)
 ):
 
     db = SessionLocal()
@@ -549,13 +577,13 @@ async def get_feedback_form(
 
 @app.post("/presentations/{presentation_id}/feedback")
 async def submit_feedback_form(
-        request: Request,
-        presentation_id: int,
-        would_use: bool = Form(False),
-        would_invest: bool = Form(False),
-        would_work: bool = Form(False),
-        comment: str = Form(""),
-        user=Depends(get_current_user),
+    request: Request,
+    presentation_id: int,
+    would_use: bool = Form(False),
+    would_invest: bool = Form(False),
+    would_work: bool = Form(False),
+    comment: str = Form(""),
+    user=Depends(get_current_user),
 ):
 
     if user is None:
@@ -636,7 +664,9 @@ def get_upcomming_events() -> list[Event]:
     """return all events that are not private and approved that have a date of today or in the future"""
     db = SessionLocal()
     today = datetime.now().date()
-    events = [row for row in db.query(Event).filter(~Event.private).filter(Event.approved)]
+    events = [
+        row for row in db.query(Event).filter(~Event.private).filter(Event.approved)
+    ]
 
     # this is truly pathetic
     without_old = []
@@ -651,8 +681,7 @@ def get_upcomming_events() -> list[Event]:
     return without_old
 
 
-
-def base_url()->str:
+def base_url() -> str:
     if TESTING:
         return "http://0.0.0.0:8000"
     else:
