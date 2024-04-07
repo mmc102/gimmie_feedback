@@ -371,14 +371,6 @@ async def make_contact(request: Request):
     )
 
 
-@app.get("/create_event/")
-async def make_event(request: Request):
-    return templates.TemplateResponse(
-        "event_template.html",
-        {"request": request},
-    )
-
-
 @app.get("/browse_events/")
 async def browse_events(request: Request):
 
@@ -387,6 +379,14 @@ async def browse_events(request: Request):
     return templates.TemplateResponse(
         "upcoming_events.html",
         {"request": request, "events": events},
+    )
+
+
+@app.get("/create_event/")
+async def make_event(request: Request):
+    return templates.TemplateResponse(
+        "event_template.html",
+        {"request": request},
     )
 
 
@@ -417,7 +417,7 @@ async def create_event(
         private=private,
         approved=is_approved,
     )
-
+    db.add(event)
 
     db.commit()
     event_id = event.id
