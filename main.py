@@ -33,7 +33,7 @@ assert SQLALCHEMY_DATABASE_URL is not None
 TESTING = "local" in SQLALCHEMY_DATABASE_URL
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False,autoflush=False, bind=engine)
 
 
 api_key_cookie = APIKeyCookie(name="session_token")
@@ -442,7 +442,7 @@ async def create_presentations(
     #  using zip longest for orders but this is sketchy
     for order, (presentation_id, name, email, tagline, url) in enumerate(zip_longest(
             parsed_presentation_ids, names, emails, taglines, urls
-    )):
+    ), start=1):
 
         url = html.escape(url)
 

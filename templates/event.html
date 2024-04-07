@@ -5,28 +5,14 @@
 {% block content %}
 
 
-<div class="container mx-auto p-8">
+<div class="container p-2">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">{{ event.name }}</h1>
     <h1 class="text-xl font-bold text-gray-800 mb-4">  <i class="fas fa-map-marker-alt mr-2"></i>{{ event.location }}</h1>
 
     {% if presentations %}
-    <div class="grid grid-cols-1 mx-auto sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div>
         {% for presentation in presentations %}
-        <div class="bg-white shadow-md rounded-md p-4">
-            <h2 class="text-2xl font-bold text-gray-800">{{ presentation.name }}</h2>
-            <p class="text-xl text-gray-600">
-                <i class="fas fa-quote-left mr-2"></i>{{ presentation.tagline }}
-            </p>
-            <a href="{{ presentation.url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600">
-                <i class="fas fa-external-link-alt mr-2"></i>{{ presentation.url }}
-            </a>
-            <p class="text-gray-600">
-                <i class="fas fa-envelope mr-2"></i>{{ presentation.email }}
-            </p>
-            <a href="/presentations/feedback/{{ presentation.id }}" class="mt-2 bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded inline-block">
-                <i class="fas fa-solid fa-comment mr-2"></i>Give Feedback
-            </a>
-        </div>
+        {% include "presentation_listing_component.html" %}
         {% endfor %}
     </div>
     {% else %}

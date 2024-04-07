@@ -15,7 +15,12 @@ how do i monitor the traffic?
 
 misc:
 
-only allow to edit if i am the user
+
+look into why we ran out of db connections
+
+require an account to create an event (maybe done)
+
+only show edit event if i am the user
 
 add export to excel
 
@@ -23,19 +28,11 @@ clicking my name should take me to a user page
 
 setup a generic error page
 
-require an account to create an event
-
 oauth ..?
 
 consider adding a license to the repo
 
 send email to event creator
-
-add a logo
-
-put datetime objects in the db not these crazy ass strings
-
-fix headers on pages for the tabs
 
 i am the password recovery
 

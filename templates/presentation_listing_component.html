@@ -1,0 +1,17 @@
+<div class="bg-white shadow-md rounded-md p-4 my-2">
+    <div class="items-center mb-2">
+        <div class="rounded-full bg-blue-500 text-white font-bold text-xl w-8 h-8 flex items-center justify-center mr-2 mb-2">{{ presentation.order }}</div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">{{ presentation.name }}</h2>
+            <p class="text-xl text-gray-600">
+                <i class="fas fa-quote-left mr-2"></i>{{ presentation.tagline }}
+            </p>
+        </div>
+    </div>
+    <a href={{ presentation.url }} target="_blank" rel="noopener noreferrer"  class="mt-2 bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded inline-block">
+        <i class="fas fa-external-link-alt mr-2"></i>{{presentation.url}}
+    </a>
+    <a href="/presentations/feedback/{{ presentation.id }}" class="mt-2 bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded inline-block">
+        <i class="fas fa-solid fa-comment mr-2"></i>Give Feedback
+    </a>
+</div>
