@@ -11,20 +11,7 @@
     {% if events %}
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
         {% for event in events %}
-        <a href="/events/{{ event.id }}" class="block">
-            <div class="bg-white shadow-md rounded-md p-4 hover:bg-blue-100 transition duration-300">
-                <p class="font-semibold">
-                    {{ event.name }}
-                </p>
-                <p class="font-semibold">
-                    <i class="fas fa-map-marker-alt mr-2"></i>{{ event.location }}
-                </p>
-                <p class="text-gray-600 mt-2">
-                    <i class="fas fa-calendar-day mr-2"></i>{{ event.date }}
-                </p>
-
-            </div>
-        </a>
+        {% include "event_card_component.html" %} 
         {% endfor %}
     </div>
 

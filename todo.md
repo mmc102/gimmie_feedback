@@ -15,11 +15,9 @@ how do i monitor the traffic?
 
 misc:
 
-clicking my name should take me to a user page
+consider adding a basic password to the account
 
 confirm basic user flow (not signed in)
-
-consider adding a logout button
 
 send email to event creator
 
@@ -29,13 +27,11 @@ look into why we ran out of db connections
 
 add export to excel
 
-
 setup a generic error page
 
 oauth ..?
 
 consider adding a license to the repo
-
 
 i am the password recovery
 

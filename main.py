@@ -48,6 +48,7 @@ class Event(Base):
     # this is reckless
     date = Column(String, nullable=False)
     time = Column(String, nullable=False)
+    user_id = Column(String, ForeignKey("users.id"))
     private = Column(Boolean, nullable=False)
     approved = Column(Boolean, nullable=False)
     password = Column(String, nullable=True)
@@ -118,6 +119,46 @@ def get_current_user(session: dict = Depends(get_session)) -> User | None:
         return User(id=val["user_id"], email_address=val["email"])
     return val
 
+@app.get("/users/{user_id}")
+async def get_user_page(
+        request: Request,
+        user_id: str,
+        user= Depends(get_current_user),
+):
+
+    if user_id != user.id:
+        return return_error_response(request, "invalid user id")
+    db = SessionLocal()
+    events = db.query(Event).filter(Event.user_id == user_id)
+    events = [e for e in events]
+    user = db.query(User).filter(User.id == user_id).one()
+    db.close()
+
+    return templates.TemplateResponse(
+        "user_page.html",
+        {"request": request, "events": events, "user": user},
+    )
+
+
+
+@app.post("/logout/{user_id}")
+async def do_logout(request: Request,
+                    user_id: str,
+                    session=Depends(get_session),
+                    user= Depends(get_current_user)):
+
+    if user_id != user.id:
+        return return_error_response(request, "invalid user id")
+
+
+
+    session["user"] = None
+    return RedirectResponse(
+        url="/browse_events/",
+        status_code=303
+    )
+
+
 
 @app.get("/user/")
 async def get_user(request: Request):
@@ -126,19 +167,19 @@ async def get_user(request: Request):
         "user_template.html",
         {
             "request": request,
-            "nriginal_referer": orignal_referer,
+            "original_referer": orignal_referer,
         },
     )
 
 
 @app.post("/create_user/")
 async def submit_user(
-    request: Request,
-    email: str = Form(""),
-    can_email: bool = Form(False),
-    newsletter: bool = Form(False),
-    original_referer: str = Form(""),
-    session=Depends(get_session),
+        request: Request,
+        email: str = Form(""),
+        can_email: bool = Form(False),
+        newsletter: bool = Form(False),
+        original_referer: str = Form(""),
+        session=Depends(get_session),
 ):
 
     db = SessionLocal()
@@ -156,10 +197,10 @@ async def submit_user(
 
 @app.get("/edit_event/")
 async def edit_event(
-    request: Request,
-    event_id: str,
-    message: str | None = None,
-    session=Depends(get_session),
+        request: Request,
+        event_id: str,
+        message: str | None = None,
+        session=Depends(get_session),
 ):
 
     event_token = session.get("event")
@@ -219,9 +260,9 @@ async def edit_event(
 
 @app.get("/event_unlock_submit/")
 async def event_unlock(
-    request: Request,
-    event_id: str,
-    password: str,
+        request: Request,
+        event_id: str,
+        password: str,
 ):
     db = SessionLocal()
 
@@ -236,7 +277,7 @@ async def event_unlock(
         get_session(request)["event"] = hashed_password
 
         return RedirectResponse(
-            url=f"/edit_event/?event_id={event_id}&m={hashed_password}"
+            url=f"/edit_event/?event_id={event_id}"
         )
 
     else:
@@ -245,8 +286,8 @@ async def event_unlock(
 
 @app.get("/event_unlock/")
 async def event_unlock_get(
-    request: Request,
-    event_id: str,
+        request: Request,
+        event_id: str,
 ):
     db = SessionLocal()
 
@@ -303,11 +344,11 @@ async def landing_page(request: Request):
 
 @app.get("/events/{event_id}")
 async def get_event(
-    request: Request,
-    event_id: str,
-    message: str | None = None,
-    user=Depends(get_current_user),
-    session=Depends(get_session),
+        request: Request,
+        event_id: str,
+        message: str | None = None,
+        user=Depends(get_current_user),
+        session=Depends(get_session),
 ):
 
     db = SessionLocal()
@@ -387,6 +428,7 @@ async def make_contact(request: Request):
     )
 
 
+
 @app.get("/browse_events/")
 async def browse_events(request: Request):
 
@@ -400,8 +442,8 @@ async def browse_events(request: Request):
 
 @app.get("/create_event/")
 async def make_event(
-    request: Request,
-    user=Depends(get_current_user),
+        request: Request,
+        user=Depends(get_current_user),
 ):
 
     if user is None:
@@ -421,15 +463,15 @@ async def make_event(
 
 @app.post("/create_event/")
 async def create_event(
-    request: Request,
-    event_name: str = Form(""),
-    password: str | None = Form(None),
-    date: str = Form(...),
-    time: str = Form(...),
-    location: str = Form(""),
-    private: bool | None = Form(None),
-    session=Depends(get_session),
-    user=Depends(get_current_user),
+        request: Request,
+        event_name: str = Form(""),
+        password: str | None = Form(None),
+        date: str = Form(...),
+        time: str = Form(...),
+        location: str = Form(""),
+        private: bool | None = Form(None),
+        session=Depends(get_session),
+        user=Depends(get_current_user),
 ):
 
     private = bool(private)
@@ -460,14 +502,14 @@ async def create_event(
 
 @app.post("/create_presentations")
 async def create_presentations(
-    request: Request,
-    event_id: str = Form(...),
-    presentation_ids: List[str] = Form([]),
-    names: List[str] = Form([]),
-    emails: List[str] = Form([]),
-    taglines: List[str] = Form([]),
-    urls: List[str] = Form([]),
-    session=Depends(get_session),
+        request: Request,
+        event_id: str = Form(...),
+        presentation_ids: List[str] = Form([]),
+        names: List[str] = Form([]),
+        emails: List[str] = Form([]),
+        taglines: List[str] = Form([]),
+        urls: List[str] = Form([]),
+        session=Depends(get_session),
 ):
 
     token = session.get("event")
@@ -497,7 +539,7 @@ async def create_presentations(
 
     #  using zip longest for orders but this is sketchy
     for order, (presentation_id, name, email, tagline, url) in enumerate(
-        zip_longest(parsed_presentation_ids, names, emails, taglines, urls), start=1
+            zip_longest(parsed_presentation_ids, names, emails, taglines, urls), start=1
     ):
 
         url = html.escape(url)
@@ -538,7 +580,7 @@ async def create_presentations(
 
 @app.get("/presentations/feedback/{presentation_id}/")
 async def get_feedback_form(
-    request: Request, presentation_id: int, user=Depends(get_current_user)
+        request: Request, presentation_id: int, user=Depends(get_current_user)
 ):
 
     db = SessionLocal()
@@ -577,13 +619,13 @@ async def get_feedback_form(
 
 @app.post("/presentations/{presentation_id}/feedback")
 async def submit_feedback_form(
-    request: Request,
-    presentation_id: int,
-    would_use: bool = Form(False),
-    would_invest: bool = Form(False),
-    would_work: bool = Form(False),
-    comment: str = Form(""),
-    user=Depends(get_current_user),
+        request: Request,
+        presentation_id: int,
+        would_use: bool = Form(False),
+        would_invest: bool = Form(False),
+        would_work: bool = Form(False),
+        comment: str = Form(""),
+        user=Depends(get_current_user),
 ):
 
     if user is None:

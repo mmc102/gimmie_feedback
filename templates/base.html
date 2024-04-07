@@ -21,9 +21,18 @@
                         <ul class="flex space-x-4">
 
                             {% if request.session.user and request.session.user.email %}
-                            <p class="text-sm p-3 rounded bg-white text-black">
-                                {{ request.session.user.email }}
-                            </p>
+                            <a href="/users/{{request.session.user.user_id}}">
+                                <p class="text-sm p-3 rounded bg-white text-black">
+                                    {{ request.session.user.email }}
+                                </p>
+                            </a>
+
+                            {% else %}
+                            <a href="/user/">
+                                <p class="text-sm p-3 rounded bg-white text-black">
+                                    Login
+                                </p>
+                            </a>
                             {% endif %}
                         </ul>
                     </div>

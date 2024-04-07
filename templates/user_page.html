@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}User Page{% endblock %}
+
+{% block content %}
+<div class ="p-2">
+    {% include "user_info_component.html" %}
+
+
+    {% if events %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        {% for event in events %}
+        {% include "event_card_component.html" %}
+        {% endfor %}
+    </div>
+
+
+    {% else %}
+    <p class="text-lg text-gray-700">You have not created any events!</p>
+
+    {% endif %}
+
+
+    <a href="/create_event" class="block max-w-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 text-center">
+        <div class="flex flex-row items-center">
+            <i class="fas fa-plus mr-2 "></i> <!-- Font Awesome plus icon -->
+            <div>
+                Create Event
+            </div>
+        </div>
+    </a>
+
+    <form action="/logout/{{user.id}}" method="POST">
+        <button type="submit" class="block max-w-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 text-center">
+            <div class="flex flex-row items-center">
+                <div>
+                    logout
+                </div>
+            </div>
+        </button>
+    </form>
+
+</div>
+
+
+
+
+
+{% endblock %}
