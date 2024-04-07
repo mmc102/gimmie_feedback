@@ -15,12 +15,13 @@ how do i monitor the traffic?
 
 misc:
 
+confirm basic user flow (not signed in)
+
+why are the divs so big on the listing
 
 look into why we ran out of db connections
 
 require an account to create an event (maybe done)
-
-only show edit event if i am the user
 
 add export to excel
 

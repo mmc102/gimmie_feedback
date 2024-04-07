@@ -22,11 +22,10 @@ from fastapi.templating import Jinja2Templates
 templates = Jinja2Templates(directory="templates")
 
 
-# Initialize FastAPI app
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-# Define a default value for the database URL
+
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 assert SQLALCHEMY_DATABASE_URL is not None
@@ -39,16 +38,13 @@ SessionLocal = sessionmaker(autocommit=False,autoflush=False, bind=engine)
 api_key_cookie = APIKeyCookie(name="session_token")
 
 
-# Define SQLAlchemy base model
 Base = declarative_base()
 
-
-# Define SQLAlchemy models
 class Event(Base):
     __tablename__ = "events"
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, index=True)
-    # this is probably reckless
+    # this is reckless
     date = Column(String, nullable=False)
     time = Column(String, nullable=False)
     private = Column(Boolean, nullable=False)
@@ -303,17 +299,49 @@ async def get_event(
         event_id: str,
         message: str | None = None,
         user=Depends(get_current_user),
+        session=Depends(get_session),
 ):
 
     db = SessionLocal()
+
+
+    if user is None:
+        return return_error_response(
+            request, "You need to be logged in to give feedback"
+        )
+
+    user_id = user.id
+
     event = db.query(Event).filter(Event.id == event_id).one_or_none()
+
+    if event is None:
+        return return_error_response(request, "This event could not be found")
 
     if not event.approved:
         return return_error_response(request, "This event has not been approved")
 
-    presentations = db.query(Presentation).filter(Presentation.event_id == event_id).order_by(Presentation.order)
+    show_edit_button = False
+    event_token = session.get("event")
+    if event_token == event.password:
+        show_edit_button = True
 
-    presentations = None if len([r for r in presentations]) == 0 else presentations
+
+    query = db.query(Presentation).filter(Presentation.event_id == event_id).order_by(Presentation.order)
+
+    feedback_query = db.query(Feedback.presentation_id).join(Presentation, Presentation.id == Feedback.presentation_id).filter(Presentation.event_id == event_id).filter(Feedback.user_id == user_id)
+
+    has_feedback_set = {row.presentation_id for row in feedback_query}
+
+
+    presentations = []
+    for presentation in query:
+        presentation.has_feedback = presentation.id in has_feedback_set
+
+        presentations.append(presentation)
+
+
+
+    presentations = None if len(presentations) == 0 else presentations
 
     return templates.TemplateResponse(
         "event.html",
@@ -322,6 +350,7 @@ async def get_event(
             "event": event,
             "presentations": presentations,
             "message": message,
+            "event_owner": show_edit_button,
         },
     )
 
@@ -390,7 +419,6 @@ async def create_event(
     )
 
 
-    db.add(event)
     db.commit()
     event_id = event.id
 
@@ -470,7 +498,6 @@ async def create_presentations(
 
         db.add(presentation)
         db.commit()
-        print(presentation.order)
 
     return RedirectResponse(
         f"/edit_event/?event_id={event.id}&message=successfully updated!",

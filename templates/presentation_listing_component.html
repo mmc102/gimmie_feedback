@@ -1,7 +1,24 @@
-<div class="bg-white shadow-md rounded-md p-4 my-2">
+<div class=" bg-white shadow-md rounded-md p-4 my-2">
     <div class="items-center mb-2">
-        <div class="rounded-full bg-blue-500 text-white font-bold text-xl w-8 h-8 flex items-center justify-center mr-2 mb-2">{{ presentation.order }}</div>
+        <div class="flex flex-row">
+            <div class="rounded-full bg-blue-500 text-white font-bold text-xl w-8 h-8 flex items-center justify-center mr-2 mb-2">{{ presentation.order }}</div>
+
+            {% if presentation.has_feedback %}
+            <div class="rounded-full bg-green-500 text-white font-bold text-xl w-8 h-8 flex items-center justify-center mr-2 mb-2">
+                <i class="fas fa-check"></i>
+            </div>
+
+            {% else %}
+            <div class="rounded bg-red-500 text-white font-bold text-xl h-8 flex items-center justify-center mr-2 mb-2 px-2">
+                TODO
+            </div>
+
+            {% endif %}
+        </div>
+
+
         <div>
+
             <h2 class="text-2xl font-bold text-gray-800">{{ presentation.name }}</h2>
             <p class="text-xl text-gray-600">
                 <i class="fas fa-quote-left mr-2"></i>{{ presentation.tagline }}
