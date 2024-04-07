@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}Your Title{% endblock %}</title>
+        <title>{% block title %}Really Great Feedback{% endblock %}</title>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
         <script src="https://kit.fontawesome.com/1eaa97093d.js" crossorigin="anonymous"></script>
 
@@ -34,25 +34,24 @@
             <p class="font-bold">{{ message }}</p>
         </div>
         <script>
-         // Automatically dismiss the alert after 5 seconds
          setTimeout(function() {
              var dismissableAlert = document.getElementById("dismissableAlert");
              if (dismissableAlert) {
                  dismissableAlert.remove();
              }
-         }, 5000); // 5000 milliseconds = 5 seconds
+         }, 5000); 
         </script>
 
 
         {% endif %}
 
 
-        <div class="content pb-16"> 
+        <div class="content pb-16 min-h-screen"> 
             {% block content %}{% endblock %}
         </div>
 
             </div>
-            <footer class="bg-gray-300 text-white py-4 fixed bottom-0 w-full">
+            <footer class="bg-gray-300 text-white py-4 bottom-0 w-full">
                 <div class="container mx-auto px-4">
                     <a href="/contact">Contact</a>
                     <a href="https://github.com/mmc102/gimmie_feedback">Github</a>

@@ -1,4 +1,5 @@
 from collections import defaultdict
+from itertools import zip_longest
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.responses import RedirectResponse
@@ -30,7 +31,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 assert SQLALCHEMY_DATABASE_URL is not None
 TESTING = "local" in SQLALCHEMY_DATABASE_URL
-print(TESTING)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -72,6 +72,7 @@ class Presentation(Base):
     tagline = Column(String)
     email = Column(String)
     url = Column(String)
+    order = Column(Integer)
 
     event = relationship("Event", back_populates="presentations")
 
@@ -116,7 +117,6 @@ def get_session(request: Request):
     return request.session
 
 
-# TODO this should be a wrapper on the ORM object, not the object itself
 def get_current_user(session: dict = Depends(get_session)) -> User | None:
     val = session.get("user")
     if val is not None:
@@ -181,9 +181,10 @@ async def edit_event(
 
     presentations_query = db.query(Presentation).filter(
         Presentation.event_id == event_id
-    )
+    ).order_by(Presentation.order)
     presentations = [row for row in presentations_query] or None
     presentation_ids = [row.id for row in presentations_query] or None
+
 
     if presentation_ids:
         # TODO this code should not use names as keys as they are not constrained in the db
@@ -310,7 +311,7 @@ async def get_event(
     if not event.approved:
         return return_error_response(request, "This event has not been approved")
 
-    presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
+    presentations = db.query(Presentation).filter(Presentation.event_id == event_id).order_by(Presentation.order)
 
     presentations = None if len([r for r in presentations]) == 0 else presentations
 
@@ -370,6 +371,7 @@ async def create_event(
         location: str = Form(""),
         private: bool | None = Form(None),
         session=Depends(get_session),
+        user=Depends(get_current_user),
 ):
 
     private = bool(private)
@@ -436,10 +438,11 @@ async def create_presentations(
     for row in to_delete:
         db.delete(row)
 
-    # Create presentations
-    for presentation_id, name, email, tagline, url in zip(
+
+    #  using zip longest for orders but this is sketchy
+    for order, (presentation_id, name, email, tagline, url) in enumerate(zip_longest(
             parsed_presentation_ids, names, emails, taglines, urls
-    ):
+    )):
 
         url = html.escape(url)
 
@@ -453,16 +456,21 @@ async def create_presentations(
             )
 
         if presentation is not None:
+            presentation.order= order
             presentation.name = name
             presentation.email = email
             presentation.tagline = tagline
             presentation.url = url
         else:
             presentation = Presentation(
-                name=name, email=email, tagline=tagline, url=url, event_id=event_id
+                name=name, email=email, tagline=tagline, url=url, event_id=event_id, order=order
             )
-            db.add(presentation)
-            db.commit()
+
+
+
+        db.add(presentation)
+        db.commit()
+        print(presentation.order)
 
     return RedirectResponse(
         f"/edit_event/?event_id={event.id}&message=successfully updated!",

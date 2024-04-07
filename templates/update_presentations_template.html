@@ -39,12 +39,18 @@
                 {% if presentations %}
                 {% for presentation in presentations %}
                 <tr class="presentation">
-                    <td class="px-4 py-2"><input type="hidden" name="presentation_ids" class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.id }}"></td>
-                    <td class="px-4 py-2"><input type="text" name="names" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.name }}"></td>
-                    <td class="px-4 py-2"><input type="text" name="taglines" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.tagline }}"></td>
-                    <td class="px-4 py-2"><input type="email" name="emails" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.email }}"></td>
-                    <td class="px-4 py-2"><input type="url" name="urls" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.url }}"></td>
-                    <td class="px-4 py-2"><button type="button" onclick="removePresentation(this)" class="bg-red-500 text-white px-4 py-2 rounded">Remove</button></td>
+                    <td class="px-2 py-2"><input type="hidden" name="presentation_ids" class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.id }}"></td>
+                    <td class="px-2 py-2"><input type="text" name="names" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.name }}"></td>
+                    <td class="px-2 py-2"><input type="text" name="taglines" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.tagline }}"></td>
+                    <td class="px-2 py-2"><input type="email" name="emails" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.email }}"></td>
+                    <td class="px-2 py-2"><input type="url" name="urls" required class="border border-gray-300 px-4 py-2 w-full" value="{{ presentation.url }}"></td>
+                    <td class="px-2 py-2">
+                        <div>
+                            <button type="button" onclick="moveUp(this)" class="bg-blue-500 text-white px-4 py-2 rounded"><i class="fas fa-arrow-up"></i></button>
+                            <button type="button" onclick="moveDown(this)" class="bg-blue-500 text-white px-4 py-2 rounded"><i class="fas fa-arrow-down"></i></button>
+                            <button type="button" onclick="removePresentation(this)" class="bg-red-500 text-white px-4 py-2 rounded"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
                 </tr>
 
                 {% endfor %}
@@ -53,12 +59,19 @@
                 <tr class="presentation">
 
 
-                    <td class="px-4 py-2"><input type="hidden" name="presentation_ids" class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                    <td class="px-4 py-2"><input type="text" name="names" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                    <td class="px-4 py-2"><input type="text" name="taglines" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                    <td class="px-4 py-2"><input type="email" name="emails" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                    <td class="px-4 py-2"><input type="url" name="urls" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
-                    <td class="px-4 py-2"><button type="button" onclick="removePresentation(this)" class="bg-red-500 text-white px-4 py-2 rounded">Remove</button></td>
+                    <td class="px-2 py-2"><input type="hidden" name="presentation_ids" class="border border-gray-300 px-4 py-2 w-full" value=""></td>
+                    <td class="px-2 py-2"><input type="text" name="names" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
+                    <td class="px-2 py-2"><input type="text" name="taglines" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
+                    <td class="px-2 py-2"><input type="email" name="emails" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
+                    <td class="px-2 py-2"><input type="url" name="urls" required class="border border-gray-300 px-4 py-2 w-full" value=""></td>
+                    <td class="px-2 py-2">
+                        <div>
+                            <button type="button" onclick="moveUp(this)" class="bg-blue-500 text-white px-4 py-2 rounded"><i class="fas fa-arrow-up"></i></button>
+                            <button type="button" onclick="moveDown(this)" class="bg-blue-500 text-white px-4 py-2 rounded"><i class="fas fa-arrow-down"></i></button>
+                            <button type="button" onclick="removePresentation(this)" class="bg-red-500 text-white px-4 py-2 rounded"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                    <td class="px-4 py-2">
                 </tr>
 
                 {% endif %}
@@ -94,6 +107,23 @@
      const row = button.closest("tr");
      row.remove();
  }
+
+ function moveUp(button) {
+     var row = button.closest('tr');
+
+     if (row.previousElementSibling) {
+         row.parentNode.insertBefore(row, row.previousElementSibling);
+     }
+ }
+ function moveDown(button) {
+     var row = button.closest('tr');
+     var nextRow = row.nextElementSibling;
+
+     if (nextRow) {
+         row.parentNode.insertBefore(nextRow, row);
+     }
+ }
+
 </script>
 
 {% endblock %}
