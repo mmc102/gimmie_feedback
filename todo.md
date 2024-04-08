@@ -12,13 +12,9 @@ do i need to increase the size of the server premtively?
 
 misc:
 
+use locus for loadtest
+
 consider a session wrapper for the db call
-
-is there a way to stress test with 100 concurrent users
-
-remove footer
-
-add middleware variable to env on prod server
 
 improve padding on the page listings
 
@@ -40,5 +36,4 @@ oauth ..?
 
 consider adding a license to the repo
 
-i am the password recovery
 

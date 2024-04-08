@@ -598,7 +598,6 @@ async def get_feedback_form(
     presentation = (
         db.query(Presentation).filter(Presentation.id == presentation_id).one_or_none()
     )
-    db.close()
     if not presentation:
         return return_error_response(request, "Presentation does not exist.")
 
@@ -612,7 +611,6 @@ async def get_feedback_form(
             .filter(Feedback.user_id == user_id)
             .one_or_none()
         )
-        db.close()
     else:
         return templates.TemplateResponse(
             "user_template.html",
