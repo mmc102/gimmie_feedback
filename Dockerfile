@@ -10,6 +10,7 @@ ARG DATABASE_URL
 
 # Set the environment variable using the build-time argument
 ENV DATABASE_URL=$DATABASE_URL
+ENV MIDDLEWARE=$MIDDLEWARE
 
 # Set the working directory in the container
 WORKDIR /app
