@@ -23,29 +23,19 @@
             <p class="text-xl text-gray-600">
                 <i class="fas fa-quote-left mr-2"></i>{{ presentation.tagline }}
             </p>
-        </div>
-    </div>
-    <div class="lg:ml-2 lg:flex lg:flex-row gap-2 justify-between">
-        <div class="py-2">
-            <a href="/presentations/feedback/{{ presentation.id }}" class="bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded">
-                {% if presentation.has_feedback %} 
-
-
-                <i class="fas fa-solid fa-edit mr-2"></i> Edit Feedback
-                {% else %}
-
-                <i class="fas fa-solid fa-comment mr-2"></i> Give Feedback
-
-                {% endif %}
-
-            </a>
-        </div>
-
-        <div class="pt-2">
-            <a href={{ presentation.url }} target="_blank" rel="noopener noreferrer"  class="bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded">
+            <a href={{ presentation.url }} target="_blank" rel="noopener noreferrer"  class="text-xl text-gray-600">
                 <i class="fas fa-external-link-alt mr-2"></i>{{presentation.url}}
             </a>
         </div>
+    </div>
+    <div class="pt-1">
+        <a href="/presentations/feedback/{{ presentation.id }}" class="bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded">
+            {% if presentation.has_feedback %}
+            <i class="fas fa-solid fa-edit mr-2"></i> Edit Feedback
+            {% else %}
+            <i class="fas fa-solid fa-comment mr-2"></i> Give Feedback
+            {% endif %}
+        </a>
     </div>
 
 
