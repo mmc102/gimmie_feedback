@@ -28,7 +28,16 @@
     <div class="lg:ml-2 lg:flex lg:flex-row gap-2 justify-between">
         <div class="py-2">
             <a href="/presentations/feedback/{{ presentation.id }}" class="bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded">
-                <i class="fas fa-solid fa-comment mr-2"></i>Give Feedback
+                {% if presentation.has_feedback %} 
+
+
+                <i class="fas fa-solid fa-edit mr-2"></i> Edit Feedback
+                {% else %}
+
+                <i class="fas fa-solid fa-comment mr-2"></i> Give Feedback
+
+                {% endif %}
+
             </a>
         </div>
 

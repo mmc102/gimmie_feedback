@@ -1,4 +1,3 @@
-db changes:
 
 
 dev ops:
@@ -12,10 +11,11 @@ how do i auto restart the service?
 how do i monitor the traffic?
 
 
-
 misc:
 
 consider adding a basic password to the account
+
+consider adding edit feeeback
 
 confirm basic user flow (not signed in)
 
