@@ -23,7 +23,10 @@ templates = Jinja2Templates(directory="templates")
 
 
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
+
+SECRET_KEY = os.getenv("MIDDLEWARE")
+assert SECRET_KEY is not None, "must set `MIDDLEWARE` env var"
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
@@ -188,6 +191,7 @@ async def submit_user(
 
     db.add(user)
     db.commit()
+    db.close()
 
     session["user"] = {"user_id": user.id, "email": user.email_address}
 
@@ -246,6 +250,7 @@ async def edit_event(
     else:
         feedback = {}
 
+    db.close()
     return templates.TemplateResponse(
         "update_presentations_template.html",
         {
@@ -267,8 +272,8 @@ async def event_unlock(
     db = SessionLocal()
 
     event = db.query(Event).filter(Event.id == event_id).one()
-    presentations = db.query(Presentation).filter(Presentation.event_id == event_id)
-    presentations = [row for row in presentations] or None
+
+    db.close()
 
     hashed_password = hash_password(password)
     if hashed_password == event.password:
@@ -292,6 +297,8 @@ async def event_unlock_get(
     db = SessionLocal()
 
     event = db.query(Event).filter(Event.id == event_id).one()
+
+    db.close()
     return templates.TemplateResponse(
         "password.html",
         {"request": request, "event": event},
@@ -374,7 +381,7 @@ async def get_event(
 
     show_edit_button = False
     event_token = session.get("event")
-    if event_token == event.password:
+    if event_token == event.password or user_id == event.user_id:
         show_edit_button = True
 
     query = (
@@ -400,6 +407,7 @@ async def get_event(
 
     presentations = None if len(presentations) == 0 else presentations
 
+    db.close()
     return templates.TemplateResponse(
         "event.html",
         {
@@ -570,8 +578,11 @@ async def create_presentations(
             )
 
         db.add(presentation)
+        # TODO: we likely dont need this commit here
         db.commit()
 
+
+    db.close()
     return RedirectResponse(
         f"/edit_event/?event_id={event.id}&message=successfully updated!",
         status_code=303,
@@ -587,17 +598,21 @@ async def get_feedback_form(
     presentation = (
         db.query(Presentation).filter(Presentation.id == presentation_id).one_or_none()
     )
+    db.close()
     if not presentation:
         return return_error_response(request, "Presentation does not exist.")
 
     if user is not None:
         user_id = user.id
+
+        db = SessionLocal()
         existing_feedback = (
             db.query(Feedback)
             .filter(Feedback.presentation_id == presentation_id)
             .filter(Feedback.user_id == user_id)
             .one_or_none()
         )
+        db.close()
     else:
         return templates.TemplateResponse(
             "user_template.html",
@@ -709,6 +724,7 @@ def get_upcomming_events() -> list[Event]:
     events = [
         row for row in db.query(Event).filter(~Event.private).filter(Event.approved)
     ]
+    db.close()
 
     # this is truly pathetic
     without_old = []

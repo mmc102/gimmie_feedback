@@ -2,20 +2,25 @@
 
 dev ops:
 
-make a meaningful secret token from an env var
-
 be able to send emails -- oh god
 
 how do i auto restart the service?
 
 how do i monitor the traffic?
 
+do i need to increase the size of the server premtively?
 
 misc:
 
-consider adding a basic password to the account
+consider a session wrapper for the db call
 
-consider adding edit feeeback
+remove footer
+
+add middleware variable to env on prod server
+
+improve padding on the page listings
+
+consider adding a basic password to the account
 
 confirm basic user flow (not signed in)
 

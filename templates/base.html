@@ -39,34 +39,12 @@
                 </div>
             </div>
         </nav>
-        {% if message %}
-        <div id="dismissableAlert" class=" bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
-            <p class="font-bold">{{ message }}</p>
-        </div>
-        <script>
-         setTimeout(function() {
-             var dismissableAlert = document.getElementById("dismissableAlert");
-             if (dismissableAlert) {
-                 dismissableAlert.remove();
-             }
-         }, 5000); 
-        </script>
-
-
-        {% endif %}
-
 
         <div class="content pb-16 min-h-screen"> 
             {% block content %}{% endblock %}
         </div>
 
             </div>
-            <footer class="bg-gray-300 text-white py-4 bottom-0 w-full">
-                <div class="container mx-auto px-4">
-                    <a href="/contact">Contact</a>
-                    <a href="https://github.com/mmc102/gimmie_feedback">Github</a>
-                </div>
-            </footer>
     </body>
 
 </html>
