@@ -11,8 +11,6 @@ check_root_url() {
 }
 
 
-cd
-cd gimmie_feedback
 # Pull the latest changes from the master branch
 git pull origin main
 
