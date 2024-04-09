@@ -12,6 +12,8 @@ do i need to increase the size of the server premtively?
 
 misc:
 
+long email incroaches
+
 use locus for loadtest
 
 consider a session wrapper for the db call
