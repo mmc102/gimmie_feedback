@@ -39,7 +39,7 @@
                 </div>
             </div>
         </nav>
-        {% if request.session.user.admin %}
+        {% if request.session.user and request.session.user.admin %}
         <div class=" bg-red-500 border-t-4 border-blue-500 rounded-b text-white px-4 py-3 shadow-md" role="alert">
             <p class="font-bold">You are an admin</p>
         </div>
