@@ -10,6 +10,8 @@ how do i monitor the traffic?
 
 do i need to increase the size of the server premtively?
 
+sometimes simple migrations hang, why?
+
 misc:
 
 

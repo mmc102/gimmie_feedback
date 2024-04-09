@@ -101,6 +101,8 @@ class User(Base):
     email_address = Column(String, nullable=True)
     can_email = Column(Boolean, nullable=False)
     newsletter = Column(Boolean, nullable=False)
+    admin = Column(Boolean, nullable=False)
+    password = Column(String, nullable=True)
 
 
 # Define relationships
