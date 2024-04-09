@@ -96,8 +96,45 @@ in theory this updates the nginx config, confirm with:
 
 sudo vim /etc/nginx/sites-available/fastapi.conf
 
+I actually had to manually remove the default things and instead copy over the server config from an existing server:
+
+server {
+server_name reallygreatfeedback.com www.reallygreatfeedback.com; 
+
+    location / { 
+        proxy_pass http://0.0.0.0:8000;  
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }   
+    
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/reallygreatfeedback.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/reallygreatfeedback.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+
+}
+
+
+server {
+listen 80; 
+server_name reallygreatfeedback.com www.reallygreatfeedback.com;
+
+    location / { 
+        return 301 https://$host$request_uri;
+    }   
+    }
+
 
 sudo systemctl reload nginx
+
+
+
 
 
 

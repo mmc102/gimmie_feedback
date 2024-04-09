@@ -402,16 +402,14 @@ async def get_event(
 
     db = SessionLocal()
 
-    if user is None:
-        return templates.TemplateResponse(
-            "user_template.html",
-            {
-                "request": request,
-                "original_referer": str(request.url),
-            },
-        )
-
-    user_id = user.id
+    # if user is None:
+    #     return templates.TemplateResponse(
+    #         "user_template.html",
+    #         {
+    #             "request": request,
+    #             "original_referer": str(request.url),
+    #         },
+    #     )
 
     event = db.query(Event).filter(Event.id == event_id).one_or_none()
 
@@ -423,7 +421,8 @@ async def get_event(
 
     show_edit_button = False
     event_token = session.get("event")
-    if event_token == event.password or user_id == event.user_id:
+    is_users_event =  user and user.id == event.user_id
+    if event_token == event.password or is_users_event:
         show_edit_button = True
 
     query = (
@@ -431,15 +430,16 @@ async def get_event(
         .filter(Presentation.event_id == event_id)
         .order_by(Presentation.order)
     )
+    has_feedback_set =set()
+    if user:
+        feedback_query = (
+            db.query(Feedback.presentation_id)
+            .join(Presentation, Presentation.id == Feedback.presentation_id)
+            .filter(Presentation.event_id == event_id)
+            .filter(Feedback.user_id == user.id)
+        )
 
-    feedback_query = (
-        db.query(Feedback.presentation_id)
-        .join(Presentation, Presentation.id == Feedback.presentation_id)
-        .filter(Presentation.event_id == event_id)
-        .filter(Feedback.user_id == user_id)
-    )
-
-    has_feedback_set = {row.presentation_id for row in feedback_query}
+        has_feedback_set = {row.presentation_id for row in feedback_query}
 
     presentations = []
     for presentation in query:
@@ -449,7 +449,6 @@ async def get_event(
 
     presentations = None if len(presentations) == 0 else presentations
 
-    
     return templates.TemplateResponse(
         "event.html",
         {
@@ -729,7 +728,7 @@ async def submit_feedback_form(
         db.add(feedback)
 
     db.commit()
-    
+
     return RedirectResponse(
         url=f"/events/{event_id}?message=Thanks for your feedback!", status_code=303
     )

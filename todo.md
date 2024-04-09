@@ -8,13 +8,11 @@ how do i auto restart the service?
 
 how do i monitor the traffic?
 
-do i need to increase the size of the server premtively?
-
 sometimes simple migrations hang, why?
 
 misc:
 
-secondary has a bug with the database url somehow..?
+add filter by share email address with presenter
 
 breakout the backend into more than one file :(
 
@@ -25,8 +23,6 @@ setup automated tests
 use locus for loadtest
 
 improve padding on the page listings
-
-consider adding a basic password to the account
 
 send email to event creator
 
