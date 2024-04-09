@@ -4,7 +4,7 @@
 git pull origin main
 
 # Build a new Docker image
-docker build --build-arg DATABASE_URL=$DATABASE_URL MIDDLEWARE=$MIDDLEWARE -t fastapi-app .
+docker build --build-arg DATABASE_URL=$DATABASE_URL --build-arg MIDDLEWARE=$MIDDLEWARE -t fastapi-app .
 
 # Apply Alembic migrations
 docker run --rm -v $(pwd)/alembic:/alembic fastapi-app alembic upgrade head
