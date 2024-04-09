@@ -7,6 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 # Define a build-time argument
 ARG DATABASE_URL
+ARG MIDDLEWARE
 
 # Set the environment variable using the build-time argument
 ENV DATABASE_URL=$DATABASE_URL

@@ -14,6 +14,8 @@ sometimes simple migrations hang, why?
 
 misc:
 
+secondary has a bug with the database url somehow..?
+
 breakout the backend into more than one file :(
 
 long email incroaches

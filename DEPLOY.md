@@ -36,18 +36,24 @@ sudo docker --version
 sudo usermod -aG docker $USER
 
 
-# set an env varaible for the db url
 echo 'export DATABASE_URL="postgresql://postgres:{put the password here}@database-1.{blahlblahblah}.us-west-2.rds.amazonaws.com/postgres"' >> ~/.bashrc
+echo 'export MIDDLEWARE="{add a big password here}"' >> ~/.bashrc
+source ~/.bashrc
 
 
-# then run the build and run commands from above
+clone the repo: 
+git clone https://github.com/mmc102/gimmie_feedback.git
 
 
-# set up nginx as a reverse proxy
+install psql in ubuntu
+sudo apt install postgresql postgresql-contrib
+
+
+
 
 sudo apt update
 sudo apt install nginx
-sudo nano /etc/nginx/sites-available/fastapi.conf
+sudo vim /etc/nginx/sites-available/fastapi.conf
 
 
 server {
@@ -62,52 +68,25 @@ server_name {blah};  # Replace with public IP address of server
         proxy_set_header X-Forwarded-Proto $scheme;
     }
     }
-    sudo ln -s /etc/nginx/sites-available/fastapi.conf /etc/nginx/sites-enabled/
-    sudo nginx -t
-    sudo systemctl reload nginx
+
+sudo ln -s /etc/nginx/sites-available/fastapi.conf /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
 
 
-# go to the website and it should work
+MAKE SURE YOU UPDATE RULES ON EC2 FOR INBOUND, COPY WORKING GROUP
+
+run deploy script
+chmox +x deploy.sh
+sudo deploy.sh
 
 
 # hook up to domain
 
-
-buy a domain
-
-set the following records:
-
 @    A   N/A   {ip of server public}
-
 www CNAME N/A  reallygreatfeedback.com
 
 
-save and now go back to nginx on server
-
-
-update the server: 
-
-
-server {
-listen 80;
-server_name reallygreatfeedback.com www.reallygreatfeedback.com; 
-
-    location / {
-        proxy_pass http://0.0.0.0:8000;  
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-    }
-
-
-
-sudo systemctl reload nginx
-
-
-
-# enable https (first need to attach this to a domain)
 
 sudo apt install certbot
 sudo apt install certbot python3-certbot-nginx
@@ -120,38 +99,8 @@ sudo vim /etc/nginx/sites-available/fastapi.conf
 
 sudo systemctl reload nginx
 
-!!IMPORTANT
-
-make sure you go to aws and add an inbound rule for https trafffic on port 443
-
-
-# setup a deploy process in the ec2 instance
-
-deploy.sh
-
-```
-#!/bin/bash
-cd
-cd gimmie_feedback
-git pull origin main
-
-docker build --build-arg DATABASE_URL=$DATABASE_URL -t fastapi-app .
-
-
-docker stop fastapi-container
-docker rm fastapi-container
-
-docker run -d -p 8000:8000 --name fastapi-container fastapi-apdocker run -d -p 8000:8000 --name fastapi-container fastapi-app
-p
-```
-
-
-after i deployed the ip of the container was no longer the same, so the nginx config was busted
-
-a valid way to test the app is running in the container:
-
-curl http://localhost:8000
 
 
 
-`
+
+
