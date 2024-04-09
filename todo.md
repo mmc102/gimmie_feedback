@@ -18,28 +18,43 @@ breakout the backend into more than one file :(
 
 long email incroaches
 
-use locus for loadtest
+setup automated tests
 
-consider a session wrapper for the db call
+use locus for loadtest
 
 improve padding on the page listings
 
 consider adding a basic password to the account
 
-confirm basic user flow (not signed in)
-
 send email to event creator
 
-something kind of fucky is happening with the user sessions
 
-look into why we ran out of db connections
 
-add export to excel
+manual testing:
 
-setup a generic error page
+Not logged in:
 
-oauth ..?
+    load landing page
+    view event
+    prompt for account
+    create account
+    leave feedback
+    edit feedback
 
-consider adding a license to the repo
+as event owner:
+
+    create event
+    create presentations
+    save presentations
+    order presentations
+    view feedback
+
+
+as admin:
+
+    get to the event
+    do the things for event owner
+
+
 
 
