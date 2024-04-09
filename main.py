@@ -191,7 +191,6 @@ async def submit_user(
 
     db.add(user)
     db.commit()
-    
 
     session["user"] = {"user_id": user.id, "email": user.email_address}
 
