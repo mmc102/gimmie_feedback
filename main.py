@@ -121,7 +121,7 @@ def get_session(request: Request):
 def get_current_user(session: dict = Depends(get_session)) -> User | None:
     val = session.get("user")
     if val is not None:
-        return User(id=val["user_id"], email_address=val["email"])
+        return User(id=val["user_id"], email_address=val["email"], admin=val.get("admin",False))
     return val
 
 @app.get("/users/{user_id}")
@@ -137,7 +137,6 @@ async def get_user_page(
     events = db.query(Event).filter(Event.user_id == user_id)
     events = [e for e in events]
     user = db.query(User).filter(User.id == user_id).one()
-    
 
     return templates.TemplateResponse(
         "user_page.html",
@@ -165,6 +164,40 @@ async def do_logout(request: Request,
 
 
 
+@app.get("/login/")
+async def get_login(request: Request):
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+        },
+    )
+
+
+
+@app.get("/login_submit/")
+async def do_login(request: Request,
+                   password: str,
+                   session=Depends(get_session),
+                   ):
+
+    db = SessionLocal()
+
+    user = db.query(User).filter(User.admin).one_or_none()
+
+    valid_password = hash_password(password) != user.password
+
+    if  valid_password:
+        session["user"] = {"user_id": user.id, "email": user.email_address, "admin": True}
+
+        return RedirectResponse(
+            url="/",
+            status_code=303
+        )
+    else:
+        return return_error_response(request, "Incorrect password. Please try again.")
+
+
 @app.get("/user/")
 async def get_user(request: Request):
     orignal_referer = request.headers.get("referer")
@@ -189,7 +222,10 @@ async def submit_user(
 
     db = SessionLocal()
 
-    user = User(email_address=email, can_email=can_email, newsletter=newsletter)
+
+
+
+    user = User(email_address=email, can_email=can_email, newsletter=newsletter, admin=False, password=None)
 
     db.add(user)
     db.commit()
@@ -206,19 +242,24 @@ async def edit_event(
         event_id: str,
         message: str | None = None,
         session=Depends(get_session),
+        user=Depends(get_current_user),
 ):
-
-    event_token = session.get("event")
-    # would happen if you did not create the event
-
-    if event_token is None:
-        return RedirectResponse(url=f"/event_unlock/?event_id={event_id}")
-
     db = SessionLocal()
-
     event = db.query(Event).filter(Event.id == event_id).one()
-    if event_token != event.password:
-        return RedirectResponse(url=f"/event_unlock/?event_id={event_id}")
+
+    event_password = session.get("event")
+
+    admin = user is not None and user.admin
+    if admin:
+        session["event"] = event.password
+
+    else:
+        if event_password is None:
+            return RedirectResponse(url=f"/event_unlock/?event_id={event_id}")
+
+
+        if event_password != event.password:
+            return RedirectResponse(url=f"/event_unlock/?event_id={event_id}")
 
     presentations_query = (
         db.query(Presentation)
@@ -251,7 +292,7 @@ async def edit_event(
     else:
         feedback = {}
 
-    
+
     return templates.TemplateResponse(
         "update_presentations_template.html",
         {
@@ -723,7 +764,6 @@ def get_upcomming_events() -> list[Event]:
     events = [
         row for row in db.query(Event).filter(~Event.private).filter(Event.approved)
     ]
-    
 
     # this is truly pathetic
     without_old = []

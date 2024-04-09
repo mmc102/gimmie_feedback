@@ -39,8 +39,29 @@
                 </div>
             </div>
         </nav>
+        {% if request.session.user.admin %}
+        <div class=" bg-red-500 border-t-4 border-blue-500 rounded-b text-white px-4 py-3 shadow-md" role="alert">
+            <p class="font-bold">You are an admin</p>
+        </div>
+        {% endif %}
 
-        <div class="content pb-16 min-h-screen"> 
+        {% if message %}
+        <div id="dismissableAlert" class=" bg-blue-100 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
+            <p class="font-bold">{{ message }}</p>
+        </div>
+        <script>
+         setTimeout(function() {
+             var dismissableAlert = document.getElementById("dismissableAlert");
+             if (dismissableAlert) {
+                 dismissableAlert.remove();
+             }
+         }, 5000); 
+        </script>
+        {% endif %}
+
+
+        <div class="content pb-16 min-h-screen">
+
             {% block content %}{% endblock %}
         </div>
 
