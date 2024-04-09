@@ -135,7 +135,7 @@ async def get_user_page(
     events = db.query(Event).filter(Event.user_id == user_id)
     events = [e for e in events]
     user = db.query(User).filter(User.id == user_id).one()
-    db.close()
+    
 
     return templates.TemplateResponse(
         "user_page.html",
@@ -191,7 +191,7 @@ async def submit_user(
 
     db.add(user)
     db.commit()
-    db.close()
+    
 
     session["user"] = {"user_id": user.id, "email": user.email_address}
 
@@ -250,7 +250,7 @@ async def edit_event(
     else:
         feedback = {}
 
-    db.close()
+    
     return templates.TemplateResponse(
         "update_presentations_template.html",
         {
@@ -273,7 +273,7 @@ async def event_unlock(
 
     event = db.query(Event).filter(Event.id == event_id).one()
 
-    db.close()
+    
 
     hashed_password = hash_password(password)
     if hashed_password == event.password:
@@ -298,7 +298,7 @@ async def event_unlock_get(
 
     event = db.query(Event).filter(Event.id == event_id).one()
 
-    db.close()
+    
     return templates.TemplateResponse(
         "password.html",
         {"request": request, "event": event},
@@ -407,7 +407,7 @@ async def get_event(
 
     presentations = None if len(presentations) == 0 else presentations
 
-    db.close()
+    
     return templates.TemplateResponse(
         "event.html",
         {
@@ -501,7 +501,7 @@ async def create_event(
     db.commit()
     event_id = event.id
 
-    db.close()
+    
 
     session["event"] = hashed
 
@@ -582,7 +582,7 @@ async def create_presentations(
         db.commit()
 
 
-    db.close()
+    
     return RedirectResponse(
         f"/edit_event/?event_id={event.id}&message=successfully updated!",
         status_code=303,
@@ -687,7 +687,7 @@ async def submit_feedback_form(
         db.add(feedback)
 
     db.commit()
-    db.close()
+    
     return RedirectResponse(
         url=f"/events/{event_id}?message=Thanks for your feedback!", status_code=303
     )
@@ -722,7 +722,7 @@ def get_upcomming_events() -> list[Event]:
     events = [
         row for row in db.query(Event).filter(~Event.private).filter(Event.approved)
     ]
-    db.close()
+    
 
     # this is truly pathetic
     without_old = []
