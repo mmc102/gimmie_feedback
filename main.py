@@ -34,7 +34,7 @@ SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 assert SQLALCHEMY_DATABASE_URL is not None
 TESTING = "local" in SQLALCHEMY_DATABASE_URL
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_size=20, max_overflow=40)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
